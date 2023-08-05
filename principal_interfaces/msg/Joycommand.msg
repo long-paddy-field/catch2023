@@ -1,0 +1,9 @@
+float64 x
+float64 y
+float64 z
+int8 rotate
+int8 faze_change
+bool extend
+bool slow
+bool[3] hand
+bool is_manual
