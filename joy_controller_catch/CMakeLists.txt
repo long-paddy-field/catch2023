@@ -13,6 +13,13 @@ find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(principal_interfaces REQUIRED)
 
+add_executable(joy_controller_catch src/joy_controller_catch.cpp src/button_manager.cpp)
+ament_target_dependencies(joy_controller_catch rclcpp std_msgs principal_interfaces sensor_msgs geometry_msgs)
+
+install(TARGETS
+  joy_controller_catch
+  DESTINATION lib/${PROJECT_NAME})
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
@@ -27,10 +34,4 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-add_executable(talker src/joy_controller_catch.cpp)
-ament_target_dependencies(joy_controller_catch rclcpp std_msgs)
-
-install(TARGETS
-  talker
-  DESTINATION lib/${PROJECT_NAME})
 ament_package()

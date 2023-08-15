@@ -1,28 +1,17 @@
 #pragma once
 
+#include <math.h>
+
 #include <chrono>
-#include <math.hpp>
 #include <memory>
 
+#include "button_manager.hpp"
 #include "principal_interfaces/msg/joycommand.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 
 namespace catch2023_principal {
-enum class BUTTONS {
-  X = 0,
-  A = 1,
-  B = 2,
-  Y = 3,
-  LB = 4,
-  RB = 5,
-  LT = 6,
-  RT = 7,
-  BACK = 8,
-  START = 9,
-  LS = 10,
-  RS = 11,
-};
+
 class JoyControllerCatch : public rclcpp::Node {
  public:
   // constructor
@@ -32,6 +21,12 @@ class JoyControllerCatch : public rclcpp::Node {
 
  private:
   // member functions
+
+  // initialize msg
+  void init_msg();
+  // initialize button class
+  void init_btn();
+  // main routine
   void update();
 
   // callback function
@@ -44,9 +39,8 @@ class JoyControllerCatch : public rclcpp::Node {
       joy_command_publisher_;
   rclcpp::TimerBase::SharedPtr timer_;
   principal_interfaces::msg::Joycommand joy_command_;
-  bool is_connected_ = false;
-  bool is_enabled_ = true;
-  bool buttons_[12] = {false};
+  ButtonManager buttons[14];
+  bool is_connected = false;
 };
 
 }  // namespace catch2023_principal
