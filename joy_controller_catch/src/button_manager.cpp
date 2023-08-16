@@ -23,20 +23,20 @@ void ButtonManager::set(bool btn) {
 
 bool ButtonManager::read() {
   switch (button_type) {
-    case BUTTON_TYPE::ON_OFF:
-      return on_off;
-      break;
-    case BUTTON_TYPE::PUSH_RELEASE:
-      return push_release;
-      break;
-    case BUTTON_TYPE::PULSER:
-      if (pulser) {
-        pulser = false;
-        return true;
-      } else {
-        return false;
-      }
-    default:
+  case BUTTON_TYPE::ON_OFF:
+    return on_off;
+    break;
+  case BUTTON_TYPE::PUSH_RELEASE:
+    return push_release;
+    break;
+  case BUTTON_TYPE::PULSER:
+    if (pulser) {
+      pulser = false;
+      return true;
+    } else {
       return false;
+    }
+  default:
+    return false;
   }
 }
