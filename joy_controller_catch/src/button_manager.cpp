@@ -10,7 +10,7 @@ ButtonManager::ButtonManager(BUTTON_TYPE _button_type)
 
 void ButtonManager::set(bool btn) {
   rclcpp::Time mytime = rclcpp::Clock().now();
-  if (mytime.nanoseconds() - time_counter > 0.5 * 1E9 && btn != past_btn) {
+  if (mytime.nanoseconds() - time_counter > 0.2 * 1E9 && btn != past_btn) {
     on_off = !on_off;
     push_release = btn;
     time_counter = mytime.nanoseconds();
