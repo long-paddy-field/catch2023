@@ -3,12 +3,15 @@
 #include <chrono>
 #include <memory>
 
-#include "rclcpp/rclcpp.hpp"
 #include "md_lib/odrive.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 namespace catch2023_principal {
-class Converter {
+class Converter : public rclcpp::Node {
  public:
+  Converter();
+  ~Converter();
+
  private:
   // methods
   void update();
