@@ -43,6 +43,9 @@ class Core : public rclcpp::Node {
   // callbacks
   void update();
   void joyCallback(const principal_interfaces::msg::Joycommand::SharedPtr msg);
+  void commandvelCallback(
+      const rclcpp::Client<principal_interfaces::srv::Commandvel>::SharedFuture
+          response);
 
   // methodes
   void sendCommandVel(VEL cmd);

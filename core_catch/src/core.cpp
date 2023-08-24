@@ -36,7 +36,6 @@ void Core::update() {
     RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, z: %f", current_pos.x,
                 current_pos.y, current_pos.z);
     // sendTf();
-    
   }
 }
 
@@ -64,11 +63,19 @@ void Core::sendCommandVel(VEL cmd) {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
                 "service not available, waiting again...");
   }
-  auto result = command_vel_client->async_send_request(request);
-  RCLCPP_INFO(this->get_logger(), "Waiting for response");
-  current_pos.x = result.get()->x;
-  current_pos.y = result.get()->y;
-  current_pos.z = result.get()->z;
+  // サービスのレスポンスをcurrent_posに代入
+  auto result = command_vel_client->async_send_request(
+      request,
+      std::bind(&Core::commandvelCallback, this, std::placeholders::_1));
+}
+
+void Core::commandvelCallback(
+    const rclcpp::Client<principal_interfaces::srv::Commandvel>::SharedFuture
+        response) {
+  RCLCPP_INFO(this->get_logger(), "Callback");
+  current_pos.x = response.get()->x;
+  current_pos.y = response.get()->y;
+  current_pos.z = response.get()->z;
   RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, z: %f", current_pos.x,
               current_pos.y, current_pos.z);
 }

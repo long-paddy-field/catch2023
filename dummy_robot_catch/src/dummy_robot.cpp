@@ -18,8 +18,6 @@ void DummyRobot::serviceCallback(
   response->x = request->x;
   response->y = request->y;
   response->z = request->z;
-  RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, z: %f", response->x,
-              response->y, response->z);
 }
 
 int main(int argc, char *argv[]) {
