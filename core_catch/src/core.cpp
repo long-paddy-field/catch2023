@@ -66,18 +66,12 @@ void Core::sendCommandVel(VEL cmd) {
   // サービスのレスポンスをcurrent_posに代入
   auto result = command_vel_client->async_send_request(
       request,
-      std::bind(&Core::commandvelCallback, this, std::placeholders::_1));
-}
-
-void Core::commandvelCallback(
-    const rclcpp::Client<principal_interfaces::srv::Commandvel>::SharedFuture
-        response) {
-  RCLCPP_INFO(this->get_logger(), "Callback");
-  current_pos.x = response.get()->x;
-  current_pos.y = response.get()->y;
-  current_pos.z = response.get()->z;
-  RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, z: %f", current_pos.x,
-              current_pos.y, current_pos.z);
+      [this](rclcpp::Client<principal_interfaces::srv::Commandvel>::SharedFuture
+                 response) {
+        current_pos.x = response.get()->x;
+        current_pos.y = response.get()->y;
+        current_pos.z = response.get()->z;
+      });
 }
 
 void Core::sendTf() {

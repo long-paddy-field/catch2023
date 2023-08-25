@@ -14,7 +14,6 @@ void DummyRobot::serviceCallback(
     const std::shared_ptr<principal_interfaces::srv::Commandvel::Request>
         request,
     std::shared_ptr<principal_interfaces::srv::Commandvel::Response> response) {
-  RCLCPP_INFO(this->get_logger(), "Service callback");
   response->x = request->x;
   response->y = request->y;
   response->z = request->z;
