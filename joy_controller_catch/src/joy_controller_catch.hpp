@@ -41,6 +41,7 @@ class JoyControllerCatch : public rclcpp::Node {
   principal_interfaces::msg::Joycommand joy_command_;
   ButtonManager buttons[14];
   bool is_connected = false;
+  float vel_max = 0;  // 手動での速度最大値
 };
 
 }  // namespace catch2023_principal

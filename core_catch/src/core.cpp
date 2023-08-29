@@ -1,6 +1,7 @@
 #include "core.hpp"
 using namespace std::chrono_literals;
 using namespace catch2023_principal;
+#include <functional>
 
 Core::Core() : Node("core") {
   arm_tf = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -63,6 +64,7 @@ void Core::sendCommandVel(VEL cmd) {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
                 "service not available, waiting again...");
   }
+
   // サービスのレスポンスをcurrent_posに代入
   auto result = command_vel_client->async_send_request(
       request,

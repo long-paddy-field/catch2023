@@ -14,6 +14,7 @@ JoyControllerCatch::JoyControllerCatch() : Node("joy_controller_catch") {
       "joy", 10, std::bind(&JoyControllerCatch::joy_callback, this, _1));
   timer_ = this->create_wall_timer(
       50ms, std::bind(&JoyControllerCatch::timer_callback, this));
+  vel_max = 0.5;
 }
 void JoyControllerCatch::init_msg() {
   joy_command_.x = 0;
@@ -49,9 +50,9 @@ void JoyControllerCatch::init_btn() {
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
   is_connected = true;
-  joy_command_.x = msg->axes[1];
-  joy_command_.y = msg->axes[0];
-  joy_command_.z = msg->axes[3];
+  joy_command_.x = vel_max * msg->axes[1];
+  joy_command_.y = vel_max * msg->axes[0];
+  joy_command_.z = vel_max * msg->axes[3];
   joy_command_.extend = msg->axes[2];
 
   buttons[static_cast<int>(BUTTONS::LC)].set(msg->axes[4] < -0.9);
