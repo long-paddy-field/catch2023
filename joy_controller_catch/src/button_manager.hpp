@@ -22,12 +22,12 @@ enum class BUTTONS {
   DC = 15,
 };
 enum class BUTTON_TYPE {
-  ON_OFF = 0,        // 押すたびにON(TRUE)-OFF(FALSE)切り替え
-  PUSH_RELEASE = 1,  // 押しているとON(TRUE),離すとOFF(FALSE）
-  PULSER = 2,        // 押したら1回だけパルス出る
+  ON_OFF = 0,       // 押すたびにON(TRUE)-OFF(FALSE)切り替え
+  PUSH_RELEASE = 1, // 押しているとON(TRUE),離すとOFF(FALSE）
+  PULSER = 2,       // 押したら1回だけパルス出る
 };
 class ButtonManager {
- public:
+public:
   // constructor
   ButtonManager(){};
   ButtonManager(BUTTON_TYPE _button_type);
@@ -38,7 +38,7 @@ class ButtonManager {
   bool read();
   operator bool() { return read(); };
 
- private:
+private:
   // member variables
   BUTTON_TYPE button_type;
   rclcpp::Node *node;
@@ -48,4 +48,4 @@ class ButtonManager {
   double time_counter = 0;
   bool past_btn = false;
 };
-};  // namespace catch2023_principal
+}; // namespace catch2023_principal
