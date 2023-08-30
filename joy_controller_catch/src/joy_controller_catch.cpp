@@ -7,9 +7,14 @@ using namespace std::chrono_literals;
 JoyControllerCatch::JoyControllerCatch() : Node("joy_controller_catch") {
   init_msg();
   init_btn();
-  joy_command_publisher_ =
-      this->create_publisher<principal_interfaces::msg::Joycommand>(
-          "joy_command", 10);
+  move_command_publisher_ =
+      this->create_publisher<principal_interfaces::msg::Movecommand>(
+          "moce_command_manual", 10);
+  state_command_publisher_ =
+      this->create_publisher<principal_interfaces::msg::Statecommand>(
+          "state_command", 10);
+  is_auto_publisher_ =
+      this->create_publisher<std_msgs::msg::Bool>("is_auto", 10);
   joy_subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
       "joy", 10, std::bind(&JoyControllerCatch::joy_callback, this, _1));
   timer_ = this->create_wall_timer(
@@ -17,18 +22,16 @@ JoyControllerCatch::JoyControllerCatch() : Node("joy_controller_catch") {
   vel_max = 0.5;
 }
 void JoyControllerCatch::init_msg() {
-  joy_command_.x = 0;
-  joy_command_.y = 0;
-  joy_command_.z = 0;
-  joy_command_.extend = 0;
-  joy_command_.rotate = 0;
-  joy_command_.shift = 0;
-  joy_command_.faze_change = 0;
-  joy_command_.slow = false;
-  joy_command_.is_auto = false;
-  joy_command_.hand[0] = false;
-  joy_command_.hand[1] = false;
-  joy_command_.hand[2] = false;
+  move_command_.x = 0;
+  move_command_.y = 0;
+  move_command_.z = 0;
+  move_command_.rotate = 0;
+  state_command_.shift = 0;
+  state_command_.faze_change = 0;
+  is_auto_.data = false;
+  move_command_.hand[0] = false;
+  move_command_.hand[1] = false;
+  move_command_.hand[2] = false;
 }
 void JoyControllerCatch::init_btn() {
   buttons[static_cast<int>(BUTTONS::X)] = ButtonManager(BUTTON_TYPE::ON_OFF);
@@ -50,10 +53,10 @@ void JoyControllerCatch::init_btn() {
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
   is_connected = true;
-  joy_command_.x = vel_max * msg->axes[1];
-  joy_command_.y = vel_max * msg->axes[0];
-  joy_command_.z = vel_max * msg->axes[3];
-  joy_command_.extend = msg->axes[2];
+  float slow = msg->buttons[static_cast<int>(BUTTONS::RT)] ? 0.25 : 1.0;
+  move_command_.x = vel_max * msg->axes[1] * slow;
+  move_command_.y = vel_max * msg->axes[0] * slow;
+  move_command_.z = vel_max * msg->axes[3] * slow;
 
   buttons[static_cast<int>(BUTTONS::LC)].set(msg->axes[4] < -0.9);
   buttons[static_cast<int>(BUTTONS::RC)].set(msg->axes[4] > 0.9);
@@ -73,21 +76,23 @@ void JoyControllerCatch::joy_callback(
 
 void JoyControllerCatch::timer_callback() {
   if (is_connected) {
-    joy_command_.rotate = buttons[static_cast<int>(BUTTONS::LB)] -
-                          buttons[static_cast<int>(BUTTONS::RB)];
-    joy_command_.shift = buttons[static_cast<int>(BUTTONS::LC)] -
-                         buttons[static_cast<int>(BUTTONS::RC)];
-    joy_command_.faze_change = buttons[static_cast<int>(BUTTONS::START)] -
-                               buttons[static_cast<int>(BUTTONS::BACK)];
-    joy_command_.is_auto = buttons[static_cast<int>(BUTTONS::LT)];
-    joy_command_.slow = buttons[static_cast<int>(BUTTONS::RT)];
+    move_command_.rotate = buttons[static_cast<int>(BUTTONS::LB)] -
+                           buttons[static_cast<int>(BUTTONS::RB)];
+    state_command_.shift = buttons[static_cast<int>(BUTTONS::LC)] -
+                           buttons[static_cast<int>(BUTTONS::RC)];
+    state_command_.faze_change = buttons[static_cast<int>(BUTTONS::START)] -
+                                 buttons[static_cast<int>(BUTTONS::BACK)];
+    is_auto_.data = buttons[static_cast<int>(BUTTONS::LT)];
+
     if (buttons[static_cast<int>(BUTTONS::A)]) {
     } else {
-      joy_command_.hand[0] = buttons[static_cast<int>(BUTTONS::X)];
-      joy_command_.hand[1] = buttons[static_cast<int>(BUTTONS::Y)];
-      joy_command_.hand[2] = buttons[static_cast<int>(BUTTONS::B)];
+      move_command_.hand[0] = buttons[static_cast<int>(BUTTONS::X)];
+      move_command_.hand[1] = buttons[static_cast<int>(BUTTONS::Y)];
+      move_command_.hand[2] = buttons[static_cast<int>(BUTTONS::B)];
     }
-    joy_command_publisher_->publish(joy_command_);
+    move_command_publisher_->publish(move_command_);
+    state_command_publisher_->publish(state_command_);
+    is_auto_publisher_->publish(is_auto_);
   }
 
   is_connected = false;

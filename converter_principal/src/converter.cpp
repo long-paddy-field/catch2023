@@ -11,7 +11,7 @@ Converter::Converter()
   commandvel_service =
       this->create_service<principal_interfaces::srv::Commandvel>(
           "command_vel",
-          std::bind(&Converter::commandvel_callback, this, _1, _2));
+          std::bind(&Converter::commandvel_callback, this, _1, _2));   
 }
 
 void Converter::commandvel_callback(
