@@ -1,2 +1,2 @@
-int8 faze_change
+int8 phaze_change
 int8 shift
