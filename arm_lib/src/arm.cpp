@@ -32,7 +32,7 @@ void Arm::timerCallback() {
   uint8_t data[8] = {0};
   *(float *)data = zMode == pos ? zPos : zVel;
   data[4] = zMode;
-  data[5] = armAngle;
+  data[5] = (char)armAngle;
 
   for (int i = 0; i < 3; i++) {
     data[6] |= (uint8_t)handState[i] << i;

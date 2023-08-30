@@ -1,21 +1,22 @@
 #pragma once
 
-#include "rclcpp/rclcpp.hpp"
-#include "rogilink2_interfaces/msg/frame.hpp"
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/timer.hpp>
 #include <string>
 
+#include "rclcpp/rclcpp.hpp"
+#include "rogilink2_interfaces/msg/frame.hpp"
+
 using namespace std::placeholders;
 using namespace std::chrono_literals;
 
 class Arm {
-public:
+ public:
   Arm(rclcpp::Node *node, std::string deviceName);
 
   enum ZMode { vel = 0, pos = 1 };
-  enum ArmAngle { ownArea, commonArea };
+  enum ArmAngle { blueArea = -1, commonArea = 0, redArea = 1 };
 
   void setZMode(ZMode mode);
   void setZPos(float pos);
@@ -27,7 +28,7 @@ public:
 
   float getZPos();
 
-private:
+ private:
   const rclcpp::Node *node;
   const std::string deviceName;
   rclcpp::Publisher<rogilink2_interfaces::msg::Frame>::SharedPtr pub;
@@ -38,7 +39,7 @@ private:
   void timerCallback();
 
   ZMode zMode = pos;
-  ArmAngle armAngle = ownArea;
+  ArmAngle armAngle = blueArea;
   bool handState[3] = {0};
 
   float zPos = 0;
