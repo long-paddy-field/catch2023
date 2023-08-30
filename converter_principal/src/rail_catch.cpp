@@ -3,7 +3,8 @@
 using namespace catch2023_principal;
 
 RailCatch::RailCatch(rclcpp::Node *node, std::string name, float lower_limit,
-                     float upper_limit, float vel_limit, float belt_ratio, float arg)
+                     float upper_limit, float vel_limit, float belt_ratio,
+                     float arg)
     : node(node),
       odrive(node, name),
       lower_limit(lower_limit),
@@ -13,16 +14,9 @@ RailCatch::RailCatch(rclcpp::Node *node, std::string name, float lower_limit,
       arg(arg) {
   position = 0;
   is_auto = false;
-  base_name = "no_definition";
-  rail_name = "no_definition";
-  interlock = "no_definition";
-}
-
-void RailCatch::set_name(std::string _base_name, std::string _rail_name,
-                         std::string _interlock) {
-  base_name = _base_name;
-  rail_name = _rail_name;
-  interlock = _interlock;
+  odrive.init();
+  odrive.setMode(Md::Mode::Velocity);
+  odrive.setVelocity(0);
 }
 
 void RailCatch::change_mode_pos_to_vel() {
@@ -55,8 +49,9 @@ void RailCatch::send_cmd_vel(float cmd) {
   } else {
     // 速度上限を超えない範囲でsetVel,速度上限は限界に近いほど小さくなる
     if (cmd > 0) {
-      odrive.setVelocity(std::min(
-          cmd / belt_ratio, vel_limit * (1 - exp(arg * (position - upper_limit)))));
+      odrive.setVelocity(
+          std::min(cmd / belt_ratio,
+                   vel_limit * (1 - exp(arg * (position - upper_limit)))));
 
     } else {
       odrive.setVelocity(std::max(

@@ -6,12 +6,12 @@
 #include "md_lib/odrive.hpp"
 #include "principal_interfaces/action/commandpos.hpp"
 #include "principal_interfaces/srv/commandvel.hpp"
+#include "rail_catch.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
 namespace catch2023_principal {
 
-  
 class Converter : public rclcpp::Node {
  public:
   // constructor
@@ -33,7 +33,8 @@ class Converter : public rclcpp::Node {
           goal);
 
   // member variables
-  ODrive lower, middle;
+  RailCatch lower;
+  RailCatch middle;
   rclcpp_action::Server<principal_interfaces::action::Commandpos>::SharedPtr
       commandpos_server;
   rclcpp::Service<principal_interfaces::srv::Commandvel>::SharedPtr
