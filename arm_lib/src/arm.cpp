@@ -1,14 +1,15 @@
 #include "arm_lib/arm.hpp"
+
 #include <cstring>
 #include <rogilink2_interfaces/msg/detail/frame__struct.hpp>
 
 Arm::Arm(rclcpp::Node *node, std::string deviceName)
     : node(node), deviceName(deviceName) {
   pub = node->create_publisher<rogilink2_interfaces::msg::Frame>(
-      "rogilink/send", 10);
+      "rogilink2/send", 10);
   sub = node->create_subscription<rogilink2_interfaces::msg::Frame>(
-      "rogilink/arm", 10, std::bind(&Arm::rogilinkCallback, this, _1));
-  timer = node->create_wall_timer(20ms, std::bind(&Arm::timerCallback, this));
+      "rogilink2/receive_arm", 10, std::bind(&Arm::rogilinkCallback, this, _1));
+  timer = node->create_wall_timer(100ms, std::bind(&Arm::timerCallback, this));
 }
 
 void Arm::setZMode(ZMode mode) { zMode = mode; }
@@ -23,8 +24,7 @@ void Arm::setHand(bool hand0, bool hand1, bool hand2) {
 
 void Arm::rogilinkCallback(
     const rogilink2_interfaces::msg::Frame::SharedPtr msg) {
-  if (msg->cmd_id != 0x03)
-    return;
+  if (msg->cmd_id != 0x03) return;
   currentZPos = *(float *)msg->data.data();
 }
 
@@ -44,3 +44,5 @@ void Arm::timerCallback() {
   frame.cmd_id = 1;
   pub->publish(frame);
 }
+
+float Arm::getZPos() { return currentZPos; }

@@ -1,0 +1,22 @@
+rogilink2_config: # これがないとconfigとして認識しないので注意
+  baudrate: 115200 # ボーレート
+  port: "/dev/serial/by-id/usb-STMicroelectronics_STM32_Virtual_ComPort_2044373B5333-if00" # シリアルポートのパス
+  # port: "/dev/ttyACM1"
+  devices: # このノードにつなげるデバイスの一覧
+    # - id: 1               hardID
+    #   name: "main_board"  任意の名前
+    #   enablesPing: true   option PINGを確認するか(未実装)
+    - id: 0x3F
+      name: "broadcast"
+      enablesPing: false
+    - id: 1
+      name: "X"
+      enableWatchdog: true
+    - id: 2
+      name: "Y"
+      enableWatchdog: true
+    - id: 3
+      name: "arm"
+      enablesPing: true
+
+ 

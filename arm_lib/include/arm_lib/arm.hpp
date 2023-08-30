@@ -5,7 +5,6 @@
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/timer.hpp>
-#include <rogilink2_interfaces/msg/detail/frame__struct.hpp>
 #include <string>
 
 using namespace std::placeholders;
@@ -46,6 +45,4 @@ private:
   float zVel = 0;
 
   float currentZPos = 0;
-
 };
-
