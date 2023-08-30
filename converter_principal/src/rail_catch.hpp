@@ -12,10 +12,9 @@ namespace catch2023_principal {
 class RailCatch {
  public:
   RailCatch(rclcpp::Node *node, std::string name, float lower_limit,
-            float upper_limit, float vel_limit, float ratio, float arg);
+            float upper_limit, float vel_limit, float ratio, float arg,
+            bool &is_auto);
   ~RailCatch(){};
-  void change_mode_vel_to_pos();
-  void change_mode_pos_to_vel();
   void send_cmd_pos(float cmd);
   void send_cmd_vel(float cmd);
   float get_pos();
