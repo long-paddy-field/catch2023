@@ -9,7 +9,7 @@ JoyControllerCatch::JoyControllerCatch() : Node("joy_controller_catch") {
   init_btn();
   move_command_publisher_ =
       this->create_publisher<principal_interfaces::msg::Movecommand>(
-          "move_command_manual", 10);
+          "manual_move_command", 10);
   state_command_publisher_ =
       this->create_publisher<principal_interfaces::msg::Statecommand>(
           "state_command", 10);
@@ -81,7 +81,7 @@ void JoyControllerCatch::timer_callback() {
     state_command_.shift = buttons[static_cast<int>(BUTTONS::LC)] -
                            buttons[static_cast<int>(BUTTONS::RC)];
     state_command_.phaze_change = buttons[static_cast<int>(BUTTONS::START)] -
-                                 buttons[static_cast<int>(BUTTONS::BACK)];
+                                  buttons[static_cast<int>(BUTTONS::BACK)];
     is_auto_.data = buttons[static_cast<int>(BUTTONS::LT)];
 
     if (buttons[static_cast<int>(BUTTONS::A)]) {

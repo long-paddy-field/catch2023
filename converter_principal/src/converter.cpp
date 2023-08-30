@@ -4,25 +4,76 @@ using namespace std::placeholders;
 
 Converter::Converter()
     : Node("converter"),
-      lower(this, "X", 0, 0, 0, 0, 0),
-      middle(this, "Y", 0, 0, 0, 0, 0) {
-  // ODriveの初期設定
-
-  commandvel_service =
-      this->create_service<principal_interfaces::srv::Commandvel>(
-          "command_vel",
-          std::bind(&Converter::commandvel_callback, this, _1, _2));   
+      lower(this, "X", 0, 0, 0, 0, 0, is_auto),
+      middle(this, "Y", 0, 0, 0, 0, 0, is_auto),
+      arm(this, "arm") {
+  // subscriberの初期設定
+  manual_command_subscription =
+      this->create_subscription<principal_interfaces::msg::Movecommand>(
+          "manual_move_command", 10,
+          std::bind(&Converter::manual_command_callback, this, _1));
+  auto_command_subscription =
+      this->create_subscription<principal_interfaces::msg::Movecommand>(
+          "auto_move_command", 10,
+          std::bind(&Converter::auto_command_callback, this, _1));
+  is_auto_subscription = this->create_subscription<std_msgs::msg::Bool>(
+      "is_auto", 10, [this](const std_msgs::msg::Bool::SharedPtr msg) {
+        if (is_auto && !msg->data) {
+          arm.setZMode(Arm::ZMode::vel);
+        } else if (!is_auto && msg->data) {
+          arm.setZMode(Arm::ZMode::pos);
+        }
+        is_auto = msg->data;
+      });
+  joint_state_publisher =
+      this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
+  timer_ = this->create_wall_timer(100ms, std::bind(&Converter::update, this));
 }
 
-void Converter::commandvel_callback(
-    const std::shared_ptr<principal_interfaces::srv::Commandvel::Request>
-        request,
-    std::shared_ptr<principal_interfaces::srv::Commandvel::Response> response) {
-  lower.send_cmd_vel(request->x);
-  middle.send_cmd_vel(request->y);
+void Converter::manual_command_callback(
+    const principal_interfaces::msg::Movecommand::SharedPtr msg) {
+  if (!is_auto) {
+    movecommand.x = msg->x;
+    movecommand.y = msg->y;
+    movecommand.z = msg->z;
+    movecommand.rotate = msg->rotate;
+    movecommand.hand[0] = msg->hand[0];
+    movecommand.hand[1] = msg->hand[1];
+    movecommand.hand[2] = msg->hand[2];
+  }
+}
 
-  response->x = lower.get_pos();
-  response->y = middle.get_pos();
+void Converter::auto_command_callback(
+    const principal_interfaces::msg::Movecommand::SharedPtr msg) {
+  if (is_auto) {
+    movecommand.x = msg->x;
+    movecommand.y = msg->y;
+    movecommand.z = msg->z;
+    movecommand.rotate = msg->rotate;
+    movecommand.hand[0] = msg->hand[0];
+    movecommand.hand[1] = msg->hand[1];
+    movecommand.hand[2] = msg->hand[2];
+  }
+}
+
+void Converter::send_command() {
+  if (is_auto) {
+    lower.send_cmd_pos(movecommand.y);
+    middle.send_cmd_pos(movecommand.x);
+    arm.setZPos(movecommand.z);
+  } else {
+    lower.send_cmd_vel(movecommand.y);
+    middle.send_cmd_vel(movecommand.x);
+    arm.setZVel(movecommand.z);
+  }
+  arm.setArmAngle(static_cast<Arm::ArmAngle>(movecommand.rotate));
+  arm.setHand(movecommand.hand[0], movecommand.hand[1], movecommand.hand[2]);
+}
+void Converter::send_tf() {}
+
+void Converter::update() {
+  send_command();
+  send_tf();
 }
 
 int main(int argc, char* argv[]) {
