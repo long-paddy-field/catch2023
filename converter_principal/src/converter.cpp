@@ -68,6 +68,8 @@ void Converter::send_command() {
   }
   arm.setArmAngle(static_cast<Arm::ArmAngle>(movecommand.rotate));
   arm.setHand(movecommand.hand[0], movecommand.hand[1], movecommand.hand[2]);
+  RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, z: %f", movecommand.x,
+              movecommand.y, movecommand.z);
 }
 void Converter::send_tf() {}
 
