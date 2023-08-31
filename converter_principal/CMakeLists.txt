@@ -6,18 +6,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
-find_package(ament_cmake REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(md_lib REQUIRED)
-find_package(arm_lib REQUIRED)
-find_package(principal_interfaces REQUIRED)
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
 
-add_executable(converter_principal src/converter.cpp src/rail_catch.cpp)
-ament_target_dependencies(converter_principal 
-rclcpp std_msgs geometry_msgs sensor_msgs md_lib arm_lib principal_interfaces)
+ament_auto_add_executable(${PROJECT_NAME} src/converter.cpp src/rail_catch.cpp)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -33,4 +25,4 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package()
+ament_auto_package()
