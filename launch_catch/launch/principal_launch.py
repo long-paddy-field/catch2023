@@ -23,5 +23,20 @@ def generate_launch_description():
                 executable="dummy_robot_catch",
                 name="dummy_robot",
             ),
+            Node(
+                package="rogilink2",
+                executable="rogilink2",
+                name="rogilink2",
+                output="screen",
+                emulate_tty=True,
+                parameters=[{
+                    "config_path":
+                    os.path.join(
+                        get_package_share_directory("launch_catch"),
+                        "config",
+                        "rogilink.yaml",
+                    )
+                }],
+            )
         ]
     )

@@ -34,10 +34,10 @@ void RailCatch::send_cmd_vel(float cmd) {
     // 速度上限を超えない範囲でsetVel,速度上限は限界に近いほど小さくなる
     if (cmd > 0) {
       odrive.setPosition(0);
-      odrive.setLimits(cmd / belt_ratio);
+      odrive.setLimits(cmd / belt_ratio, 30);
     } else {
       odrive.setPosition(upper_limit - lower_limit);
-      odrive.setLimits(abs(cmd) / belt_ratio);
+      odrive.setLimits(abs(cmd) / belt_ratio, 30);
     }
   }
 }

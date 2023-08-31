@@ -8,6 +8,14 @@ Converter::Converter()
       middle(this, "Y", 0, 0, 0, 0, 0, is_auto),
       arm(this, "arm") {
   // subscriberの初期設定
+  movecommand.x = 0;
+  movecommand.y = 0;
+  movecommand.z = 0;
+  movecommand.rotate = 0;
+  movecommand.hand[0] = false;
+  movecommand.hand[1] = false;
+  movecommand.hand[2] = false;
+  
   manual_command_subscription =
       this->create_subscription<principal_interfaces::msg::Movecommand>(
           "manual_move_command", 10,

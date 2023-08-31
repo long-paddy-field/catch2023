@@ -2,11 +2,24 @@
 
 #include <chrono>
 #include <memory>
+#include <thread>
 
-#include "principal_interfaces/srv/commandvel.hpp"
+#include "arm_lib/arm.hpp"
+#include "md_lib/odrive.hpp"
+#include "principal_interfaces/msg/movecommand.hpp"
+
 #include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
+#include "std_msgs/msg/bool.hpp"
 
 namespace catch2023_principal {
+typedef struct MOVECOMMAND {
+  float x;
+  float y;
+  float z;
+  int rotate;
+  bool hand[3];
+} MOVECOMMAND;
 class DummyRobot : public rclcpp::Node {
  public:
   // constructor
@@ -16,16 +29,28 @@ class DummyRobot : public rclcpp::Node {
 
  private:
   // methods
-    
-  // callbacks
-  void serviceCallback(
-      const std::shared_ptr<principal_interfaces::srv::Commandvel::Request>
-          request,
-      std::shared_ptr<principal_interfaces::srv::Commandvel::Response>
-          response);
+  void update();
+  // 手動のときに使うcallback
+  void manual_command_callback(
+      const principal_interfaces::msg::Movecommand::SharedPtr msg);
+  // 自動のときに使うcallback
+  void auto_command_callback(
+      const principal_interfaces::msg::Movecommand::SharedPtr msg);
+  // 指令値を送信
+  void send_command();
+  // tfに現在地を登録
+  void send_tf();
 
   // member variables
-  rclcpp::Service<principal_interfaces::srv::Commandvel>::SharedPtr service;
-
+  MOVECOMMAND movecommand;
+  bool is_auto = false;
+  rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
+      manual_command_subscription;
+  rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
+      auto_command_subscription;
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr is_auto_subscription;
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr
+      joint_state_publisher;
+  rclcpp::TimerBase::SharedPtr timer_;
 };
-};  // namespace catch2023_principal
+}  // namespace catch2023_principal

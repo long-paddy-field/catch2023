@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(converter_principal)
+project(monitor_catch)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,17 +7,12 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(md_lib REQUIRED)
-find_package(arm_lib REQUIRED)
 find_package(principal_interfaces REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
-add_executable(converter_principal src/converter.cpp src/rail_catch.cpp)
-ament_target_dependencies(converter_principal 
-rclcpp std_msgs geometry_msgs sensor_msgs md_lib arm_lib principal_interfaces)
+add_executable(monitor src/monitor.cpp)
+ament_dependencies(monitor rclcpp principal_interfaces sensor_msgs)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
