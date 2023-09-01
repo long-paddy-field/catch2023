@@ -13,12 +13,16 @@ RailCatch::RailCatch(rclcpp::Node *node, std::string name, float lower_limit,
       belt_ratio(belt_ratio),
       arg(arg),
       is_auto(is_auto) {
+  RCLCPP_INFO(node->get_logger(), "rail_init_start");
   position = 0;
+  past_cmd = 0;
+}
+void RailCatch::init_odrive() {
   odrive.init();
-  odrive.setMode(Md::Mode::Velocity);
+  odrive.setMode(Md::Mode::Position,
+                 ODriveEnum::InputMode::INPUT_MODE_TRAP_TRAJ);
   odrive.setVelocity(0);
 }
-
 void RailCatch::send_cmd_pos(float cmd) {
   if (is_auto) {
     odrive.setPosition(cmd / belt_ratio);
@@ -33,13 +37,28 @@ void RailCatch::send_cmd_vel(float cmd) {
   } else {
     // 速度上限を超えない範囲でsetVel,速度上限は限界に近いほど小さくなる
     if (cmd > 0) {
+      if (past_cmd <= 0) {
+        odrive.setPosition(odrive.getPosition());
+        odrive.setMode(Md::Mode::Position,
+                       ODriveEnum::InputMode::INPUT_MODE_PASSTHROUGH);
+        odrive.setMode(Md::Mode::Position,
+                       ODriveEnum::InputMode::INPUT_MODE_TRAP_TRAJ);
+      }
       odrive.setPosition(0);
       odrive.setLimits(cmd / belt_ratio, 30);
     } else {
-      odrive.setPosition(upper_limit - lower_limit);
+      if (past_cmd >= 0) {
+        odrive.setPosition(odrive.getPosition());
+        odrive.setMode(Md::Mode::Position,
+                       ODriveEnum::InputMode::INPUT_MODE_PASSTHROUGH);
+        odrive.setMode(Md::Mode::Position,
+                       ODriveEnum::InputMode::INPUT_MODE_TRAP_TRAJ);
+      }
+      odrive.setPosition((upper_limit - lower_limit) / belt_ratio);
       odrive.setLimits(abs(cmd) / belt_ratio, 30);
     }
   }
+  past_cmd = cmd;
 }
 
 float RailCatch::get_pos() {

@@ -5,10 +5,10 @@ using namespace std::placeholders;
 using namespace std::chrono_literals;
 
 Monitor::Monitor() : Node("monitor") {
-  current_pos.x = 0;
-  current_pos.y = 0;
-  current_pos.z = 0;
-  current_pos.rotate = 0;
+  current_pos.x = 1;
+  current_pos.y = 1;
+  current_pos.z = 1;
+  current_pos.rotate = 1;
 
   joint_state_pub =
       this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
@@ -28,6 +28,7 @@ void Monitor::current_pos_callback(
 }
 
 void Monitor::update() {
+  RCLCPP_INFO(this->get_logger(), "nyan");
   sensor_msgs::msg::JointState msg;
   msg.header.stamp = this->get_clock()->now();
   msg.name.push_back("lower_platform");
@@ -47,7 +48,7 @@ void Monitor::update() {
 
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::shared_ptr<Monitor>());
+  rclcpp::spin(std::make_shared<Monitor>());
   rclcpp::shutdown();
   return 0;
 }

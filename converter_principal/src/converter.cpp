@@ -4,8 +4,8 @@ using namespace std::placeholders;
 
 Converter::Converter()
     : Node("converter"),
-      lower(this, "X", 0, 0, 0, 0, 0, is_auto),
-      middle(this, "Y", 0, 0, 0, 0, 0, is_auto),
+      lower(this, "X", 0, 1.1, 1, 0.14, 0, is_auto),
+      middle(this, "Y", 0, 1.1, 1, 0.14, 0, is_auto),
       arm(this, "arm") {
   // subscriberの初期設定
   movecommand.x = 0;
@@ -15,7 +15,9 @@ Converter::Converter()
   movecommand.hand[0] = false;
   movecommand.hand[1] = false;
   movecommand.hand[2] = false;
-  
+  RCLCPP_INFO(this->get_logger(), "start_init");
+  lower.init_odrive();
+  // middle.init_odrive();
   manual_command_subscription =
       this->create_subscription<principal_interfaces::msg::Movecommand>(
           "manual_move_command", 10,
@@ -36,6 +38,7 @@ Converter::Converter()
   joint_state_publisher =
       this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
   timer_ = this->create_wall_timer(100ms, std::bind(&Converter::update, this));
+  RCLCPP_INFO(this->get_logger(), "end_init");
 }
 
 void Converter::manual_command_callback(

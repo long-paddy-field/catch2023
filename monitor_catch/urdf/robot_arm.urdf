@@ -39,6 +39,7 @@
                 <box size="0.1 0.1 0.2"/>
             </geometry>
         </visual>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </link>
     <link name="hand_link">
         <visual>
@@ -46,6 +47,7 @@
                 <box size="0.2 0.1 0.1"/>
             </geometry>
         </visual>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </link>
 
     <joint name="base_lower_joint" type="fixed">

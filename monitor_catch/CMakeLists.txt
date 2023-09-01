@@ -6,13 +6,24 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(principal_interfaces REQUIRED)
-find_package(sensor_msgs REQUIRED)
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
 
-add_executable(monitor src/monitor.cpp)
-ament_dependencies(monitor rclcpp principal_interfaces sensor_msgs)
+ament_auto_add_executable(monitor_catch src/monitor.cpp)
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY urdf
+  DESTINATION share/${PROJECT_NAME})
+
+install(
+  PROGRAMS
+  launch/monitor_launch.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -28,4 +39,4 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package()
+ament_auto_package()

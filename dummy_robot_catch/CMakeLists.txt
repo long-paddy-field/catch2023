@@ -6,15 +6,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
-find_package(ament_cmake REQUIRED)
-find_package(principal_interfaces REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(rogilink2 REQUIRED)
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
 
-add_executable(dummy_robot_catch src/dummy_robot.cpp)
-ament_target_dependencies(dummy_robot_catch rclcpp principal_interfaces)
+ament_auto_add_executable(dummy_robot_catch src/dummy_robot.cpp)
 
 install(TARGETS
   dummy_robot_catch

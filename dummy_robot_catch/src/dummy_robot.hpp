@@ -43,7 +43,9 @@ class DummyRobot : public rclcpp::Node {
 
   // member variables
   MOVECOMMAND movecommand;
+  POS current_pos;
   bool is_auto = false;
+
   rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
       manual_command_subscription;
   rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
