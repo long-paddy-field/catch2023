@@ -1,10 +1,15 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+
 import os
 
 
 def generate_launch_description():
+    field_color = LaunchConfiguration("field_color", default="blue")
+    
     return LaunchDescription(
         [
             Node(package="joy", executable="joy_node", name="joy"),

@@ -4,11 +4,11 @@ using namespace catch2023_principal;
 using namespace std::placeholders;
 using namespace std::chrono_literals;
 
-Monitor::Monitor() : Node("monitor") {
-  current_pos.x = 1;
-  current_pos.y = 1;
-  current_pos.z = 1;
-  current_pos.rotate = 1;
+Monitor::Monitor() : Node("monitor_catch") {
+  current_pos.x = 0;
+  current_pos.y = 0;
+  current_pos.z = 0;
+  current_pos.rotate = 0;
 
   joint_state_pub =
       this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
@@ -16,7 +16,7 @@ Monitor::Monitor() : Node("monitor") {
       this->create_subscription<principal_interfaces::msg::Movecommand>(
           "current_pos", 10,
           std::bind(&Monitor::current_pos_callback, this, _1));
-  timer_ = this->create_wall_timer(10ms, std::bind(&Monitor::update, this));
+  timer_ = this->create_wall_timer(100ms, std::bind(&Monitor::update, this));
 }
 
 void Monitor::current_pos_callback(
@@ -28,7 +28,6 @@ void Monitor::current_pos_callback(
 }
 
 void Monitor::update() {
-  RCLCPP_INFO(this->get_logger(), "nyan");
   sensor_msgs::msg::JointState msg;
   msg.header.stamp = this->get_clock()->now();
   msg.name.push_back("lower_platform");
@@ -44,6 +43,7 @@ void Monitor::update() {
   msg.position.push_back(current_pos.rotate);
 
   joint_state_pub->publish(msg);
+  // RCLCPP_INFO(this->get_logger(), "Publishing: nya");
 }
 
 int main(int argc, char* argv[]) {

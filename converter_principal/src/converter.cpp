@@ -35,8 +35,9 @@ Converter::Converter()
         }
         is_auto = msg->data;
       });
-  joint_state_publisher =
-      this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
+  current_pos_publisher =
+      this->create_publisher<principal_interfaces::msg::Movecommand>(
+          "current_pos", 10);
   timer_ = this->create_wall_timer(100ms, std::bind(&Converter::update, this));
   RCLCPP_INFO(this->get_logger(), "end_init");
 }
@@ -82,7 +83,17 @@ void Converter::send_command() {
   RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, z: %f", movecommand.x,
               movecommand.y, movecommand.z);
 }
-void Converter::send_tf() {}
+void Converter::send_tf() {
+  principal_interfaces::msg::Movecommand msg;
+  msg.x = middle.get_pos();
+  msg.y = lower.get_pos();
+  msg.z = arm.getZPos();
+  msg.rotate = movecommand.rotate;
+  msg.hand[0] = movecommand.hand[0];
+  msg.hand[1] = movecommand.hand[1];
+  msg.hand[2] = movecommand.hand[2];
+  current_pos_publisher->publish(msg);
+}
 
 void Converter::update() {
   send_command();
