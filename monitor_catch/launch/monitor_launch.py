@@ -29,22 +29,32 @@ def generate_launch_description():
             parameters=[{'use_sim_time': use_sim_time, 'robot_description': robot_desc}],
             arguments=[urdf]),
         Node(
-          package='joint_state_publisher',
+            package='joint_state_publisher',
             executable='joint_state_publisher',
             name='joint_state_publisher',
             output='screen',
-              
         ),
         Node(
             package='monitor_catch',
             executable='monitor_catch',
-            name='monitor',
+            name='monitor_catch',
             output='screen'),
         Node(
             package='rviz2',
-            namespace='',
+            namespace='rviz2',
             executable='rviz2',
             name='rviz2',
             arguments=['-d' + os.path.join(get_package_share_directory('monitor_catch'), 'rviz2', 'robot_arm.rviz')]
+        ),
+        Node(package="joy", executable="joy_node", name="joy"),
+        Node(
+            package="joy_controller_catch",
+            executable="joy_controller_catch",
+            name="joy_controller",
+        ),
+        Node(
+            package="dummy_robot_catch",
+            executable="dummy_robot_catch",
+            name="dummy_robot_catch",
         )
     ])

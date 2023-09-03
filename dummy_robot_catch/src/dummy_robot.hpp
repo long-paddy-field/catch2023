@@ -4,10 +4,7 @@
 #include <memory>
 #include <thread>
 
-#include "arm_lib/arm.hpp"
-#include "md_lib/odrive.hpp"
 #include "principal_interfaces/msg/movecommand.hpp"
-
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "std_msgs/msg/bool.hpp"
@@ -20,6 +17,7 @@ typedef struct MOVECOMMAND {
   int rotate;
   bool hand[3];
 } MOVECOMMAND;
+
 class DummyRobot : public rclcpp::Node {
  public:
   // constructor
@@ -43,7 +41,7 @@ class DummyRobot : public rclcpp::Node {
 
   // member variables
   MOVECOMMAND movecommand;
-  POS current_pos;
+  MOVECOMMAND current_pos;
   bool is_auto = false;
 
   rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
@@ -51,8 +49,8 @@ class DummyRobot : public rclcpp::Node {
   rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
       auto_command_subscription;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr is_auto_subscription;
-  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr
-      joint_state_publisher;
+  rclcpp::Publisher<principal_interfaces::msg::Movecommand>::SharedPtr
+      current_pos_publisher;
   rclcpp::TimerBase::SharedPtr timer_;
 };
 }  // namespace catch2023_principal

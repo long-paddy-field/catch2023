@@ -52,8 +52,8 @@ class Converter : public rclcpp::Node {
   rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
       auto_command_subscription;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr is_auto_subscription;
-  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr
-      joint_state_publisher;
+  rclcpp::Publisher<principal_interfaces::msg::Movecommand>::SharedPtr
+      current_pos_publisher;
   rclcpp::TimerBase::SharedPtr timer_;
 };
 }  // namespace catch2023_principal
