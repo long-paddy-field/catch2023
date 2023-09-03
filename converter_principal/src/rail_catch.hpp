@@ -16,6 +16,8 @@ class RailCatch {
             bool &is_auto);
   ~RailCatch(){};
 
+  void change_mode_vel_to_pos();
+  void change_mode_pos_to_vel();
   void send_cmd_pos(float cmd);
   void send_cmd_vel(float cmd);
   void init_odrive();

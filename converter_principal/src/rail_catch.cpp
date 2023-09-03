@@ -20,7 +20,7 @@ RailCatch::RailCatch(rclcpp::Node *node, std::string name, float lower_limit,
 void RailCatch::init_odrive() {
   odrive.init();
   odrive.setMode(Md::Mode::Position,
-                 ODriveEnum::InputMode::INPUT_MODE_TRAP_TRAJ);
+                 ODriveEnum::InputMode::INPUT_MODE_POS_FILTER);
   odrive.setVelocity(0);
 }
 void RailCatch::send_cmd_pos(float cmd) {
@@ -30,6 +30,15 @@ void RailCatch::send_cmd_pos(float cmd) {
     RCLCPP_ERROR(node->get_logger(), "This is not available in manual mode");
   }
 }
+void RailCatch::change_mode_pos_to_vel() {
+  odrive.setMode(Md::Mode::Position,
+                 ODriveEnum::InputMode::INPUT_MODE_POS_FILTER);
+}
+
+void RailCatch::change_mode_vel_to_pos() {
+  odrive.setMode(Md::Mode::Position,
+                 ODriveEnum::InputMode::INPUT_MODE_TRAP_TRAJ);
+}
 
 void RailCatch::send_cmd_vel(float cmd) {
   if (is_auto) {
@@ -37,25 +46,14 @@ void RailCatch::send_cmd_vel(float cmd) {
   } else {
     // 速度上限を超えない範囲でsetVel,速度上限は限界に近いほど小さくなる
     if (cmd > 0) {
-      if (past_cmd <= 0) {
-        odrive.setPosition(odrive.getPosition());
-        odrive.setMode(Md::Mode::Position,
-                       ODriveEnum::InputMode::INPUT_MODE_PASSTHROUGH);
-        odrive.setMode(Md::Mode::Position,
-                       ODriveEnum::InputMode::INPUT_MODE_TRAP_TRAJ);
-      }
       odrive.setPosition(0);
       odrive.setLimits(cmd / belt_ratio, 30);
-    } else {
-      if (past_cmd >= 0) {
-        odrive.setPosition(odrive.getPosition());
-        odrive.setMode(Md::Mode::Position,
-                       ODriveEnum::InputMode::INPUT_MODE_PASSTHROUGH);
-        odrive.setMode(Md::Mode::Position,
-                       ODriveEnum::InputMode::INPUT_MODE_TRAP_TRAJ);
-      }
+    } else if (cmd < 0) {
       odrive.setPosition((upper_limit - lower_limit) / belt_ratio);
       odrive.setLimits(abs(cmd) / belt_ratio, 30);
+    } else {
+      odrive.setPosition(odrive.getPosition());
+      odrive.setLimits(0, 30);
     }
   }
   past_cmd = cmd;

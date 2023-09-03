@@ -30,8 +30,10 @@ Converter::Converter()
       "is_auto", 10, [this](const std_msgs::msg::Bool::SharedPtr msg) {
         if (is_auto && !msg->data) {
           arm.setZMode(Arm::ZMode::vel);
+          lower.change_mode_pos_to_vel();
         } else if (!is_auto && msg->data) {
           arm.setZMode(Arm::ZMode::pos);
+          lower.change_mode_vel_to_pos();
         }
         is_auto = msg->data;
       });
