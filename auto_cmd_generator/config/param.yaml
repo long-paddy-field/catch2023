@@ -1,0 +1,5 @@
+auto_cmd_generator:
+  ros__parameters:
+    group:
+     param1: 100
+     param2: 5.0
