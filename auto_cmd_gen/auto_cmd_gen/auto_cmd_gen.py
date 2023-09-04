@@ -202,8 +202,8 @@ class AutoCmdGen(Node):
         pass
 
 
-def main():
-    rclpy.init()
+def main(args=None):
+    rclpy.init(args=args)
     node = AutoCmdGen()
     rclpy.spin(node)
     node.destroy_node()
