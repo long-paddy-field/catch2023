@@ -4,7 +4,7 @@
     <link name="lower_module_link">
         <visual>
             <geometry>
-                <box size="0.2 1.39 0.028"/>
+                <box size="1.39 0.2 0.028"/>
             </geometry>
         </visual>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
@@ -12,7 +12,7 @@
     <link name = "platform_link">
         <visual>
             <geometry>
-                <box size="0.2 0.134 0.201"/>
+                <box size="0.134 0.2 0.201"/>
             </geometry>
         </visual>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
@@ -20,7 +20,7 @@
     <link name="middle_module_link">
         <visual>
             <geometry>
-                <box size = "1.1 0.02 0.1575"/>
+                <box size = "0.02 1.1 0.1575"/>
             </geometry>
         </visual>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
@@ -44,7 +44,7 @@
     <link name="hand_link">
         <visual>
             <geometry>
-                <box size="0.2 0.1 0.1"/>
+                <box size="0.1 0.2 0.1"/>
             </geometry>
         </visual>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
@@ -58,28 +58,28 @@
     <joint name="base_lower_joint" type="fixed">
         <parent link="base_link"/>
         <child link="lower_module_link"/>
-        <origin xyz="0.1 -0.695 0.014" rpy="0 0 0"/>
+        <origin xyz="0.606 0 -0.014" rpy="0 0 0"/>
     </joint>
     <joint name="lower_platform" type="prismatic">
         <parent link="lower_module_link"/>
         <child link ="platform_link"/>
         <origin xyz = "0 0 0.1145" rpy="0 0 0"/>
         <limit lower="-0.606" upper="0.606" effort="2.00" velocity="2.00"/>
-        <axis xyz="0 1 0"/>
+        <axis xyz="1 0 0"/>
     </joint>
     <joint name="platform_middle" type="prismatic">
         <parent link="platform_link"/>
         <child link="middle_module_link"/>
         <origin xyz="0 0 0.17925" rpy="0 0 0"/>
-        <limit lower="-0.606" upper="0.606" effort="2.00" velocity="2.00"/>
-        <axis xyz="1 0 0"/>
+        <limit lower="-0.414425" upper="0.414425" effort="2.00" velocity="2.00"/>
+        <axis xyz="0 1 0"/>
     </joint>
     <joint name="middle_end" type="prismatic">
         <parent link="middle_module_link"/>
         <child link="end_effector_link"/>
         <origin xyz="0 0.21 0" rpy="0 0 0"/>
-        <limit lower="-0.606" upper="0.606" effort="2.00" velocity="2.00"/>
-        <axis xyz="1 0 0"/>
+        <limit lower="-0.414425" upper="0.414425" effort="2.00" velocity="2.00"/>
+        <axis xyz="0 1 0"/>
     </joint>
     <joint name="end_wrest" type="prismatic">
         <parent link="end_effector_link"/>

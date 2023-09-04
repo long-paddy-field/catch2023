@@ -49,6 +49,8 @@ void JoyControllerCatch::init_btn() {
       ButtonManager(BUTTON_TYPE::PUSH_RELEASE);
   buttons[static_cast<int>(BUTTONS::LC)] = ButtonManager(BUTTON_TYPE::PULSER);
   buttons[static_cast<int>(BUTTONS::RC)] = ButtonManager(BUTTON_TYPE::PULSER);
+  buttons[static_cast<int>(BUTTONS::UC)] = ButtonManager(BUTTON_TYPE::PULSER);
+  buttons[static_cast<int>(BUTTONS::DC)] = ButtonManager(BUTTON_TYPE::PULSER);
 }
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
@@ -82,6 +84,8 @@ void JoyControllerCatch::timer_callback() {
                            buttons[static_cast<int>(BUTTONS::RC)];
     state_command_.phaze_change = buttons[static_cast<int>(BUTTONS::START)] -
                                   buttons[static_cast<int>(BUTTONS::BACK)];
+    state_command_.is_common = buttons[static_cast<int>(BUTTONS::UC)] -
+                               buttons[static_cast<int>(BUTTONS::DC)];
     is_auto_.data = buttons[static_cast<int>(BUTTONS::LT)];
 
     if (buttons[static_cast<int>(BUTTONS::A)]) {
