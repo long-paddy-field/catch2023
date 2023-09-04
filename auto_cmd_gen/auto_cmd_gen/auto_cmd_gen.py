@@ -206,8 +206,8 @@ class AutoCmdGen(Node):
         self.auto_command_pub.publish(self.cmd)
 
 
-def main():
-    rclpy.init()
+def main(args=None):
+    rclpy.init(args=args)
     node = AutoCmdGen()
     rclpy.spin(node)
     node.destroy_node()
