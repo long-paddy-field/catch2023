@@ -37,3 +37,18 @@ def catch_move(self):
     self.cmd.z = 0
     self.cmd.rotate = -1 if self.side == "blue" else 1
     self.cmd.hand = [False, False, False]
+
+
+def catch_down(self):
+    self.cmd.x = self.current_pos.x
+    self.cmd.y = self.current_pos.y
+    self.cmd.z = 0 if 0 < self.shot_count and self.shot_count+self.shift_count < 10 else 1
+    
+    self.cmd.hand = [False, False, False]
+    
+def catch_hold(self):
+    self.cmd.x = self.current_pos.x
+    self.cmd.y = self.current_pos.y
+    self.cmd.z = 0 if 0 < self.shot_count and self.shot_count+self.shift_count < 10 else 1
+    
+    self.cmd.hand = [False, False, False]

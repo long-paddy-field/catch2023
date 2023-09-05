@@ -49,8 +49,8 @@ void JoyControllerCatch::init_btn() {
       ButtonManager(BUTTON_TYPE::PUSH_RELEASE);
   buttons[static_cast<int>(BUTTONS::LC)] = ButtonManager(BUTTON_TYPE::PULSER);
   buttons[static_cast<int>(BUTTONS::RC)] = ButtonManager(BUTTON_TYPE::PULSER);
-  buttons[static_cast<int>(BUTTONS::UC)] = ButtonManager(BUTTON_TYPE::PULSER);
-  buttons[static_cast<int>(BUTTONS::DC)] = ButtonManager(BUTTON_TYPE::PULSER);
+  buttons[static_cast<int>(BUTTONS::UC)] = ButtonManager(BUTTON_TYPE::ON_OFF);
+  buttons[static_cast<int>(BUTTONS::DC)] = ButtonManager(BUTTON_TYPE::ON_OFF);
 }
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
