@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -28,10 +29,11 @@ class AutoCmdGenerator : public rclcpp::Node {
   int sht_area_index = 0;  // 射撃エリアの目標値のインデックス
 
   int hold_count = 0;  // ホールドしたワークの数
+  bool change_state_flag = false;
+  StateName state = StateName::Init;  // 現在の状態
+  Side side = Side::Blue;             // 現在のサイド
 
-  State state = State::Init;  // 現在の状態
-  Side side = Side::Blue;     // 現在のサイド
-
+  principal_interfaces::msg::Movecommand auto_cmd;
   principal_interfaces::msg::Movecommand::SharedPtr current_pos;
 
   rclcpp::TimerBase::SharedPtr timer;
@@ -43,7 +45,14 @@ class AutoCmdGenerator : public rclcpp::Node {
   rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
       current_pos_subscription;
 
-  void timerCallback();
-  void transition(State next_state);
+  GeneralCommand handle;
+
+  void update();
+  void auto_mode();
+  void manual_mode();
+  void spinsleep(int ms);
+  void reflect_param();
+  bool has_arrived();
+  bool is_auto;
 };
 }  // namespace catch2023_principal

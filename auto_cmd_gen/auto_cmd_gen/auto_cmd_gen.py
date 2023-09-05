@@ -59,118 +59,27 @@ class AutoCmdGen(Node):
         self.transition(State.Init)
 
     def transition(self, state: State):
-        field_target = self.target_pos[self.field_index]
-        shoot_target = self.shoot_pos[self.shoot_index]
-
         match state:
             case State.Init:
-                init_state(self)
-                cmd.x = 0
-                cmd.y = 0 if self.side == 'blue' else 180
-                cmd.z = 0
-                cmd.rotate = 1 if self.side == 'blue' else -1
-                cmd.hand = [0, 0, 0]
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
 
             case State.CatchMove:
-                cmd.x = field_target["x"]
-                cmd.y = field_target["y"]
-                cmd.z = 0
-                if field_target["is_common"]:
-                    cmd.rotate = 0
-                elif self.side == 'blue':
-                    cmd.rotate = -1
-                else:
-                    cmd.rotate = 1
-                cmd.hand = self.prev_cmd.hand
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
 
             case State.CatchDown:
-                hand = [0, 0, 0]
-                self.hold_count += 1
-                hand[self.hold_count - 1] = 1
-
-                cmd.x = self.prev_cmd.x
-                cmd.y = self.prev_cmd.y
-                cmd.z = 1 if field_target["is_common"] else 2
-                cmd.rotate = self.prev_cmd.rotate
-                cmd.hand = hand
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
 
             case State.CatchHold:
-                cmd.x = self.prev_cmd.x
-                cmd.y = self.prev_cmd.y
-                cmd.z = self.prev_cmd.z
-                cmd.rotate = self.prev_cmd.rotate
-                cmd.hand = [0, 0, 0]
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
                 pass
             case State.CatchUp:
-                cmd.x = self.prev_cmd.x
-                cmd.y = self.prev_cmd.y
-
-                if self.hold_count == 3:
-                    cmd.z = 0
-                elif field_target["is_common"]:
-                    cmd.z = 0
-                else:
-                    cmd.z = 1
-
-                cmd.rotate = self.prev_cmd.rotate
-                cmd.hand = self.prev_cmd.hand
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
 
             case State.ShootMove:
-                cmd.x = shoot_target["x"] + 100  # シュート時のスライド量
-                cmd.y = shoot_target["y"]
-                cmd.z = 0
-                cmd.rotate = 1 if self.side == 'blue' else -1
-                cmd.hand = [0, 0, 0]
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
-
             case State.ShootDown:
-                cmd.x = self.prev_cmd.x
-                cmd.y = self.prev_cmd.y
-                cmd.z = 1
-                cmd.rotate = self.prev_cmd.rotate
-                cmd.hand = self.prev_cmd.hand
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
 
             case State.ShootSlide:
-                cmd.x = shoot_target['x']
-                cmd.y = self.prev_cmd.y
-                cmd.z = self.prev_cmd.z
-                cmd.rotate = self.prev_cmd.rotate
-                cmd.hand = self.prev_cmd.hand
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
 
             case State.ShootRelease:
-                cmd.x = self.prev_cmd.x
-                cmd.y = self.prev_cmd.y
-                cmd.z = self.prev_cmd.z
-                cmd.rotate = self.prev_cmd.rotate
-                cmd.hand = [1, 1, 1]
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
 
             case State.ShootUp:
-                cmd.x = self.prev_cmd.x
-                cmd.y = self.prev_cmd.y
-                cmd.z = 0
-                cmd.rotate = self.prev_cmd.rotate
-                cmd.hand = [0, 0, 0]
-                self.auto_command_pub.publish(cmd)
-                self.prev_cmd = cmd
 
-        self.state = state
+
 
     def timer_callback(self):
         match self.state:
