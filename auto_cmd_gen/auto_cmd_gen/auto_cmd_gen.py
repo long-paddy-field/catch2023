@@ -3,7 +3,7 @@ from rclpy.node import Node
 from std_msgs.msg import Bool  # トピック通信に使うStringメッセージ型をインポート
 from principal_interfaces.msg import Statecommand, Movecommand
 import csv
-from state import State
+from state import State, init_state
 
 
 class AutoCmdGen(Node):
@@ -16,6 +16,7 @@ class AutoCmdGen(Node):
     def __init__(self):
         super().__init__('auto_cmd_gen')
 
+        self.cmd = Movecommand()
         self.timer = self.create_timer(0.1, self.timer_callback)  # timerの宣言
         self.state_command_sub = self.create_subscription(
             Statecommand, '/state_command', self.state_command_callback, 10)
@@ -35,7 +36,7 @@ class AutoCmdGen(Node):
         # targetのcsvを読み込む
         target_csv_path = self.get_parameter(
             'config_folder').get_parameter_value(
-            ).string_value + '/' + self.side + '.csv'
+        ).string_value + '/' + self.side + '.csv'
         with open(target_csv_path) as f:
             reader = csv.reader(f)
             self.target_pos = [{
@@ -47,7 +48,7 @@ class AutoCmdGen(Node):
         # シューティングエリアのcsvを読み込む
         shoot_csv_path = self.get_parameter(
             'config_folder').get_parameter_value(
-            ).string_value + '/' + self.side + '_shoot.csv'
+        ).string_value + '/' + self.side + '_shoot.csv'
         with open(shoot_csv_path) as f:
             reader = csv.reader(f)
             self.shoot_pos = [{
@@ -58,12 +59,12 @@ class AutoCmdGen(Node):
         self.transition(State.Init)
 
     def transition(self, state: State):
-        cmd = Movecommand()
         field_target = self.target_pos[self.field_index]
         shoot_target = self.shoot_pos[self.shoot_index]
 
         match state:
             case State.Init:
+                init_state(self)
                 cmd.x = 0
                 cmd.y = 0 if self.side == 'blue' else 180
                 cmd.z = 0
@@ -200,6 +201,9 @@ class AutoCmdGen(Node):
 
     def current_pos_callback(self, msg):
         pass
+
+    def send_command(self):
+        self.auto_command_pub.publish(self.cmd)
 
 
 def main(args=None):

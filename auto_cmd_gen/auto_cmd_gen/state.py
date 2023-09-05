@@ -12,3 +12,43 @@ class State(Enum):
     ShootSlide = 7,
     ShootRelease = 8,
     ShootUp = 8,
+
+
+def init_state(self):
+    self.cmd.x = 0
+    self.cmd.y = -0.820 if self.side == "blue" else 0.820
+    self.cmd.z = 0
+    self.cmd.rotate = -1 if self.side == "blue" else 1
+    self.cmd.hand = [False, False, False]
+
+
+def catch_move(self):
+    if self.shot_count == 0:
+        # 最初の1つ目は1個だけでシュート
+        pass
+    elif 0 < self.shot_count and self.shot_count+self.shift_count < 10:
+        # １個目から９個目のワークは共通エリアに行く
+        pass
+    else:
+        # あとは自陣エリアでがんばる
+        pass
+    self.cmd.x = 0
+    self.cmd.y = -0.820 if self.side == "blue" else 0.820
+    self.cmd.z = 0
+    self.cmd.rotate = -1 if self.side == "blue" else 1
+    self.cmd.hand = [False, False, False]
+
+
+def catch_down(self):
+    self.cmd.x = self.current_pos.x
+    self.cmd.y = self.current_pos.y
+    self.cmd.z = 0 if 0 < self.shot_count and self.shot_count+self.shift_count < 10 else 1
+    
+    self.cmd.hand = [False, False, False]
+    
+def catch_hold(self):
+    self.cmd.x = self.current_pos.x
+    self.cmd.y = self.current_pos.y
+    self.cmd.z = 0 if 0 < self.shot_count and self.shot_count+self.shift_count < 10 else 1
+    
+    self.cmd.hand = [False, False, False]
