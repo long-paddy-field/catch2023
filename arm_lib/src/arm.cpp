@@ -34,15 +34,20 @@ void Arm::timerCallback() {
   data[4] = zMode;
   data[5] = (char)armAngle;
 
-  for (int i = 0; i < 3; i++) {
-    data[6] |= (uint8_t)handState[i] << i;
-  }
-
   rogilink2_interfaces::msg::Frame frame;
   memcpy(frame.data.data(), data, 8);
   frame.name = deviceName;
   frame.cmd_id = 1;
   pub->publish(frame);
+
+  for (int i = 0; i < 3; i++) {
+    data[i] = handState[i];
+  }
+  rogilink2_interfaces::msg::Frame frame2;
+  memcpy(frame2.data.data(), data, 8);
+  frame2.name = deviceName + "_hand";
+  frame2.cmd_id = 8;
+  pub->publish(frame2);
 }
 
 float Arm::getZPos() { return currentZPos; }

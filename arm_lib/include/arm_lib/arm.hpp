@@ -42,8 +42,8 @@ class Arm {
   ArmAngle armAngle = blueArea;
   bool handState[3] = {0};
 
-  float zPos = 0;
-  float zVel = 0;
+  float zPos = NAN;
+  float zVel = NAN;
 
-  float currentZPos = 0;
+  float currentZPos = NAN;
 };

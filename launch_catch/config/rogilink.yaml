@@ -18,5 +18,8 @@ rogilink2_config: # これがないとconfigとして認識しないので注意
     - id: 3
       name: "arm"
       enablesPing: true
+    - id: 4
+      name: "arm_hand"
+      enablesPing: true
 
  
