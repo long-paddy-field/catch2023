@@ -47,7 +47,7 @@ void AutoCmdGenerator::update() {
 void AutoCmdGenerator::auto_mode() {
   switch (state) {
     case StateName::Init:
-      handle.move_to(0, 0, 0);  // 後で初期位置を代入
+      handle.move_to(0, 0, 0, Area::Own);  // 後で初期位置を代入
       auto_cmd.rotate = (side == Side::Blue) ? 1 : -1;
       if (change_state_flag) {
         state = StateName::MoveToOwnWork;
@@ -58,7 +58,7 @@ void AutoCmdGenerator::auto_mode() {
       if (true) {
         // 左右十字が押されていたらずらすところ
       }
-      handle.move_to(0, 0, 0);  // 後で
+      handle.move_to(0, 0, 0, Area::Own);  // 後で
       if (change_state_flag || has_arrived()) {
         state = StateName::CatchOwn;
         change_state_flag = false;
@@ -71,7 +71,7 @@ void AutoCmdGenerator::auto_mode() {
       if (true) {
         // 上下キーが押されたらずらすところ
       }
-      handle.move_to(0, 0, 0);
+      handle.move_to(0, 0, 0, Area::Cmn);
       if (change_state_flag || (has_arrived() && true)) {
         // change_stateが押されたか、共通エリア上空に到着したら次へ
         state = StateName::CatchCmn;
@@ -80,7 +80,7 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::CatchOwn:
       if (!has_arrived()) {
-        handle.move_to(0, 0, 0);
+        handle.move_to(0, 0, 0, Area::Own);
       } else {
         handle.grasp(0);
         spinsleep(2000000);
@@ -96,7 +96,7 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::CatchCmn:
       if (!has_arrived()) {
-        handle.move_to(0, 0, 0);
+        handle.move_to(0, 0, 0, Area::Cmn);
       } else {
         handle.grasp(0);
         if (true) {
@@ -119,20 +119,19 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::MoveToShoot:
       if (true) {
         // シュートした回数が偶数なら
-        handle.move_to(0, 0, 0);  // ボーナスエリア上空へ
-
+        handle.move_to(0, 0, 0, Area::Shb);  // ボーナスエリア上空へ
       } else {
         // シュートした回数が奇数なら
-        handle.move_to(0, 0, 0);  // ボーナスエリアの手前へ
+        handle.move_to(0, 0, 0, Area::Shb);  // ボーナスエリアの手前へ
       }
       break;
     case StateName::Release:
       if (true) {
         // シュートした回数が偶数なら
-        handle.move_to(0, 0, 0);  // 下げて
+        handle.move_to(0, 0, 0, Area::Shb);  // 下げて
       } else {
         // シュートした回数が奇数なら
-        handle.move_to(0, 0, 0);  // 平行移動
+        handle.move_to(0, 0, 0, Area::Shb);  // 平行移動
       }
       if (change_state_flag || has_arrived()) {
         handle.release();
@@ -149,11 +148,9 @@ void AutoCmdGenerator::auto_mode() {
   rclcpp::sleep_for(100ms);
 }
 
-void manual_mode(){
+void manual_mode() {
   // 現在のアームの位置がどこにあるのかを計算し、どのステートに相当するかを推測
-  // 
-
-
+  // そのステートに相当するところに移動する
 }
 
 void AutoCmdGenerator::spinsleep(int ms) {

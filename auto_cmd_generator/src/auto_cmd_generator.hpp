@@ -35,7 +35,6 @@ class AutoCmdGenerator : public rclcpp::Node {
 
   principal_interfaces::msg::Movecommand auto_cmd;
   principal_interfaces::msg::Movecommand::SharedPtr current_pos;
-
   rclcpp::TimerBase::SharedPtr timer;
   rclcpp::Subscription<principal_interfaces::msg::Statecommand>::SharedPtr
       state_command_subscription;
