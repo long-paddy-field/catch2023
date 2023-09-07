@@ -16,7 +16,7 @@ class Arm {
   Arm(rclcpp::Node *node, std::string deviceName);
 
   enum ZMode { vel = 0, pos = 1 };
-  enum ArmAngle { blueArea = -1, commonArea = 0, redArea = 1 };
+  enum ArmAngle { blueCommonArea = -1, ownArea = 0, redCommonArea = 1 };
 
   void setZMode(ZMode mode);
   void setZPos(float pos);
@@ -39,7 +39,7 @@ class Arm {
   void timerCallback();
 
   ZMode zMode = pos;
-  ArmAngle armAngle = blueArea;
+  ArmAngle armAngle = ownArea;
   bool handState[3] = {0};
 
   float zPos = NAN;
