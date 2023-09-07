@@ -104,9 +104,8 @@ void AutoCmdGenerator::auto_mode() {
         change_state_flag = false;
       }
     case StateName::CatchOwn:
-      if (!has_arrived()) {
-        handle.move_to(ZState::OwnCatch);
-      } else {
+      handle.move_to(ZState::OwnCatch);
+      if (has_arrived_z()) {
         handle.grasp(Area::Own, own_area_index % 3);
         own_area_index += 1;
         spinsleep(2000000);
@@ -120,9 +119,8 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::CatchCmn:
-      if (!has_arrived()) {
-        handle.move_to(ZState::CmnCatch);
-      } else {
+      handle.move_to(ZState::CmnCatch);
+      if (has_arrived_z()) {
         handle.grasp(Area::Cmn, cmn_area_index);
         cmn_area_index += 1;
         spinsleep(2000000);
@@ -163,7 +161,7 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::Release:
       handle.move_to(ZState::Shoot);  // まず下げる
-      if (has_arrived()) {
+      if (has_arrived_z()) {
         if (sht_area_index % 2 == 0) {
           // シュートした回数が偶数なら
           handle.release();
@@ -178,7 +176,7 @@ void AutoCmdGenerator::auto_mode() {
           // シュートした回数が奇数なら
           handle.move_to(Area::Sht, sht_area_index, 0, ZState::Trans,
                          true);  // ボーナスエリアの上空へ
-          if (has_arrived()) {
+          if (has_arrived_xy()) {
             handle.release();
             sht_area_index += 1;
             past_state = state;
@@ -208,6 +206,22 @@ void AutoCmdGenerator::spinsleep(int ms) {
     rclcpp::sleep_for(10ms);
   }
 }
+
+bool AutoCmdGenerator::has_arrived() {
+  return has_arrived_xy() && has_arrived_z();
+}
+
+bool AutoCmdGenerator::has_arrived_xy() {
+  float error = (auto_cmd.x - current_pos->x) * (auto_cmd.x - current_pos->x) +
+                (auto_cmd.y - current_pos->y) * (auto_cmd.y - current_pos->y);
+  return error < 0.005;
+}
+
+bool AutoCmdGenerator::has_arrived_z() {
+  float error = (auto_cmd.z - current_pos->z) * (auto_cmd.z - current_pos->z);
+  return error < 0.005;
+}
+
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<AutoCmdGenerator>());

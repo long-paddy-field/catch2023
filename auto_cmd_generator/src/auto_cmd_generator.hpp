@@ -54,8 +54,9 @@ class AutoCmdGenerator : public rclcpp::Node {
   void manual_mode();
   void spinsleep(int ms);
   void reflect_param();
-  bool has_arrived(float, float);
-  bool has_arrived(ZState zstate);
+  bool has_arrived();
+  bool has_arrived_xy();
+  bool has_arrived_z();
   bool is_auto;
 };
 }  // namespace catch2023_principal
