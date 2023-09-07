@@ -24,14 +24,17 @@ class AutoCmdGenerator : public rclcpp::Node {
   std::vector<std::tuple<float, float, bool>> cmn_area;  // 共有エリアの目標値
   std::vector<std::tuple<float, float, bool>> sht_area;  // 射撃エリアの目標値
 
-  int own_area_index = 0;  // 自陣エリアの目標値のインデックス
-  int cmn_area_index = 0;  // 共有エリアの目標値のインデックス
+  int own_area_index = 1;  // 自陣エリアの目標値のインデックス
+  int cmn_area_index = 1;  // 共有エリアの目標値のインデックス
   int sht_area_index = 0;  // 射撃エリアの目標値のインデックス
 
   int hold_count = 0;  // ホールドしたワークの数
+
   bool change_state_flag = false;
-  StateName state = StateName::Init;  // 現在の状態
-  Side side = Side::Blue;             // 現在のサイド
+  StateName state = StateName::Init;       // 現在の状態
+  StateName past_state = StateName::Init;  // 一つ前の状態
+  Side side = Side::Blue;                  // 現在のサイド
+  bool is_cmn = false;  // 共通エリアに侵入できるかどうか
 
   principal_interfaces::msg::Movecommand auto_cmd;
   principal_interfaces::msg::Movecommand::SharedPtr current_pos;
@@ -51,7 +54,8 @@ class AutoCmdGenerator : public rclcpp::Node {
   void manual_mode();
   void spinsleep(int ms);
   void reflect_param();
-  bool has_arrived();
+  bool has_arrived(float, float);
+  bool has_arrived(ZState zstate);
   bool is_auto;
 };
 }  // namespace catch2023_principal

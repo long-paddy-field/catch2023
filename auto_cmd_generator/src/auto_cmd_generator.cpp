@@ -47,9 +47,10 @@ void AutoCmdGenerator::update() {
 void AutoCmdGenerator::auto_mode() {
   switch (state) {
     case StateName::Init:
-      handle.move_to(0, 0, 0, Area::Own);  // 後で初期位置を代入
-      auto_cmd.rotate = (side == Side::Blue) ? 1 : -1;
+      handle.move_to(Area::Own, 0, 1,
+                     ZState::Trans);  // 後で初期位置を代入
       if (change_state_flag) {
+        past_state = state;
         state = StateName::MoveToOwnWork;
         change_state_flag = false;
       }
@@ -57,9 +58,21 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::MoveToOwnWork:
       if (true) {
         // 左右十字が押されていたらずらすところ
+        own_area_index += 1;
       }
-      handle.move_to(0, 0, 0, Area::Own);  // 後で
+      if (own_area_index == 1) {
+        // 一個目のワークを取るときだけ例外
+        if (side == Side::Blue) {
+          handle.move_to(Area::Own, 2, own_area_index % 3, ZState::Trans);
+        } else {
+          handle.move_to(Area::Own, 0, own_area_index % 3, ZState::Trans);
+        }
+      } else {
+        handle.move_to(Area::Own, own_area_index, own_area_index % 3,
+                       ZState::Trans);
+      }
       if (change_state_flag || has_arrived()) {
+        past_state = state;
         state = StateName::CatchOwn;
         change_state_flag = false;
       }
@@ -67,79 +80,114 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::MoveToCmnWork:
       if (true) {
         // 左右十字が押されていたらずらすところ
+        cmn_area_index += 1;
       }
-      if (true) {
-        // 上下キーが押されたらずらすところ
-      }
-      handle.move_to(0, 0, 0, Area::Cmn);
-      if (change_state_flag || (has_arrived() && true)) {
+      handle.move_to(Area::Cmn, cmn_area_index, cmn_area_index % 3,
+                     ZState::Trans, is_cmn);
+      if (change_state_flag || (has_arrived() && is_cmn)) {
         // change_stateが押されたか、共通エリア上空に到着したら次へ
+        past_state = state;
         state = StateName::CatchCmn;
         change_state_flag = false;
       }
       break;
+    case StateName::MoveToWaypoint:
+      handle.move_to(Area::Cmn, 0, 0, ZState::Trans);
+      if (change_state_flag || has_arrived()) {
+        if (past_state == StateName::Release) {
+          // シューティングボックス→共通エリア
+          state = StateName::MoveToCmnWork;
+        } else {
+          // 共通エリア→シューティングボックス
+          state = StateName::MoveToShoot;
+        }
+        change_state_flag = false;
+      }
     case StateName::CatchOwn:
       if (!has_arrived()) {
-        handle.move_to(0, 0, 0, Area::Own);
+        handle.move_to(ZState::OwnCatch);
       } else {
-        handle.grasp(0);
+        handle.grasp(Area::Own, own_area_index % 3);
+        own_area_index += 1;
         spinsleep(2000000);
-        if (true) {
+        if (own_area_index == 1 || own_area_index % 3 == 0) {
           // 一個目か、保持しているワークの数が3つであれば
           state = StateName::MoveToShoot;
         } else {
           // 違ったら
           state = StateName::MoveToOwnWork;
-          // カウント増やしとく
         }
       }
       break;
     case StateName::CatchCmn:
       if (!has_arrived()) {
-        handle.move_to(0, 0, 0, Area::Cmn);
+        handle.move_to(ZState::CmnCatch);
       } else {
-        handle.grasp(0);
-        if (true) {
+        handle.grasp(Area::Cmn, cmn_area_index);
+        cmn_area_index += 1;
+        spinsleep(2000000);
+        past_state = state;
+        if (cmn_area_index % 3 == 1) {
           // 一個目か、保持しているワークの数が3つであれば
-          state = StateName::MoveToShoot;
+          state = StateName::MoveToWaypoint;
         } else {
           if (true) {
-            // 下キーが押されたら
-
+            handle.move_to(Area::Cmn, cmn_area_index - 1,
+                           (cmn_area_index - 1) % 3, ZState::CmnCatch, false);
+            is_cmn = false;
+            if (has_arrived()) {
+              state = StateName::MoveToCmnWork;
+            }
           } else if (false) {
             // 右キーが押されたら
+            state = StateName::MoveToCmnWork;
           }
-
-          // 違ったら
-          state = StateName::MoveToCmnWork;
-          // カウント増やしとく
         }
       }
       break;
     case StateName::MoveToShoot:
-      if (true) {
+      if (sht_area_index % 2 == 0) {
         // シュートした回数が偶数なら
-        handle.move_to(0, 0, 0, Area::Shb);  // ボーナスエリア上空へ
+        handle.move_to(Area::Sht, sht_area_index, 0, ZState::Trans,
+                       false);  // ボーナスエリアの手前へ
       } else {
         // シュートした回数が奇数なら
-        handle.move_to(0, 0, 0, Area::Shb);  // ボーナスエリアの手前へ
+        handle.move_to(Area::Sht, sht_area_index, 0, ZState::Trans,
+                       true);  // ボーナスエリアの上空へ
+      }
+      if (change_state_flag || has_arrived) {
+        past_state = state;
+        state = StateName::Release;
+        change_state_flag = false;
       }
       break;
     case StateName::Release:
-      if (true) {
-        // シュートした回数が偶数なら
-        handle.move_to(0, 0, 0, Area::Shb);  // 下げて
-      } else {
-        // シュートした回数が奇数なら
-        handle.move_to(0, 0, 0, Area::Shb);  // 平行移動
-      }
-      if (change_state_flag || has_arrived()) {
-        handle.release();
-        if (true) {
-          // ２〜９個目なら
-          state = StateName::MoveToCmnWork;
+      handle.move_to(ZState::Shoot);  // まず下げる
+      if (has_arrived()) {
+        if (sht_area_index % 2 == 0) {
+          // シュートした回数が偶数なら
+          handle.release();
+          sht_area_index += 1;
+          past_state = state;
+          if (cmn_area_index <= 10) {
+            state = StateName::MoveToWaypoint;
+          } else {
+            state = StateName::MoveToOwnWork;
+          }
         } else {
-          state = StateName::MoveToOwnWork;
+          // シュートした回数が奇数なら
+          handle.move_to(Area::Sht, sht_area_index, 0, ZState::Trans,
+                         true);  // ボーナスエリアの上空へ
+          if (has_arrived()) {
+            handle.release();
+            sht_area_index += 1;
+            past_state = state;
+            if (cmn_area_index <= 10) {
+              state = StateName::MoveToWaypoint;
+            } else {
+              state = StateName::MoveToOwnWork;
+            }
+          }
         }
       }
       break;
