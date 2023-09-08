@@ -36,9 +36,10 @@ public:
   // methods
   void set(bool btn);
   bool read();
+  void get_past_btn();
   operator bool() { return read(); };
 
-private:
+ private:
   // member variables
   BUTTON_TYPE button_type;
   rclcpp::Node *node;
