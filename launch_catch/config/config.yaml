@@ -1,0 +1,5 @@
+launch_catch:
+  ros__parameters:
+    field_color: "blue"
+    vel_max: 1
+   
