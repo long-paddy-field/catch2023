@@ -16,6 +16,7 @@ class RailCatch {
             bool &is_auto);
   ~RailCatch(){};
 
+  void set_pos(float pos);
   void change_mode_vel_to_pos();
   void change_mode_pos_to_vel();
   void send_cmd_pos(float cmd);
@@ -34,7 +35,7 @@ class RailCatch {
   float belt_ratio;  // モーター1回転で何m進むか
   float arg;         // 速度上限の重み
   bool is_auto;
-  float past_cmd;  // 1tick前のcmd
+  float past_vel_output = 0;  // 1tick前の速度出力
   float position;
 };
 }  // namespace catch2023_principal

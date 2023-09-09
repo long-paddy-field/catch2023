@@ -4,8 +4,8 @@ using namespace std::placeholders;
 
 Converter::Converter()
     : Node("converter"),
-      lower(this, "X", 0, 1.1, 1, 0.14, 0, is_auto),
-      middle(this, "Y", 0, 1.1, 1, 0.14, 0, is_auto),
+      lower(this, "X", 0, 1.1, 1.8, 0.14, 0, is_auto),
+      middle(this, "Y", -0.2, 0.2, 2, 0.21, 0, is_auto),
       arm(this, "arm") {
   // subscriberの初期設定
   movecommand.x = 0;
@@ -17,7 +17,9 @@ Converter::Converter()
   movecommand.hand[2] = false;
   RCLCPP_INFO(this->get_logger(), "start_init");
   lower.init_odrive();
-  // middle.init_odrive();
+  middle.init_odrive();
+  middle.set_pos(0);
+  arm.setZMode(Arm::ZMode::vel);
   manual_command_subscription =
       this->create_subscription<principal_interfaces::msg::Movecommand>(
           "manual_move_command", 10,
