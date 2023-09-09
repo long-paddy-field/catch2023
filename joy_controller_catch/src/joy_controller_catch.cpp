@@ -58,6 +58,7 @@ void JoyControllerCatch::config_params() {
   is_red =
       (this->get_parameter("field_color").as_string() == "red") ? true : false;
   vel_max = (float)this->get_parameter("vel_max").as_double();
+  RCLCPP_INFO(this->get_logger(), "field_color: %s", is_red ? "red" : "blue");
 }
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
