@@ -39,6 +39,6 @@ def generate_launch_description():
                     "config",
                     "rogilink.yaml",
                 )
-            }],
+            }, ('__log_level:=debug')],
         )
     ])

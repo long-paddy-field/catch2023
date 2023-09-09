@@ -13,8 +13,8 @@ Arm::Arm(rclcpp::Node *node, std::string deviceName)
 }
 
 void Arm::setZMode(ZMode mode) { zMode = mode; }
-void Arm::setZPos(float pos) { zPos = pos; }
-void Arm::setZVel(float vel) { zVel = vel; }
+void Arm::setZPos(float pos) { zPos = pos * STEP_PER_METER; }
+void Arm::setZVel(float vel) { zVel = vel * STEP_PER_METER; }
 void Arm::setArmAngle(ArmAngle angle) { armAngle = angle; }
 void Arm::setHand(bool hand0, bool hand1, bool hand2) {
   handState[0] = hand0;
