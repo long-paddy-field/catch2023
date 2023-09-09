@@ -64,9 +64,9 @@ void DummyRobot::update() {
 
 void DummyRobot::send_command() {
   if (is_auto) {
-    current_pos.x = movecommand.x;
-    current_pos.y = movecommand.y;
-    current_pos.z = movecommand.z;
+    current_pos.x += (movecommand.x - current_pos.x) / 10;
+    current_pos.y += (movecommand.y - current_pos.y) / 10;
+    current_pos.z += (movecommand.z - current_pos.z) / 10;
     current_pos.rotate = movecommand.rotate;
     current_pos.hand[0] = movecommand.hand[0];
     current_pos.hand[1] = movecommand.hand[1];

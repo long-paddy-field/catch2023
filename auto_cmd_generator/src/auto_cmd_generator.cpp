@@ -4,6 +4,7 @@
 
 using namespace catch2023_principal;
 using namespace std::chrono_literals;
+using namespace std::placeholders;
 
 AutoCmdGenerator::AutoCmdGenerator() : Node("auto_cmd_generator") {
   state_command_subscription =
@@ -24,23 +25,46 @@ AutoCmdGenerator::AutoCmdGenerator() : Node("auto_cmd_generator") {
           [&](principal_interfaces::msg::Movecommand::SharedPtr pos) {
             this->current_pos = pos;
           });
-
-  this->declare_parameter("side", "blue");
-  side = this->get_parameter("side").as_string() == "blue" ? Side::Blue
-                                                           : Side::Red;
-
-  this->declare_parameter("config_folder", std::string(__FILE__) + "../config");
-  std::string config_folder = this->get_parameter("config_folder").as_string();
+  param_sub = this->create_subscription<principal_interfaces::msg::Parameters>(
+      "parameters", 10, std::bind(&AutoCmdGenerator::reflect_param, this, _1));
+}
+void AutoCmdGenerator::reflect_param(
+    const principal_interfaces::msg::Parameters::SharedPtr msg) {
+  if (!is_init) {
+    side = msg->isred ? Side::Red : Side::Blue;
+    WORKLOCATION location;
+    location.own_area.push_back(
+        std::make_pair(msg->startpos[0], msg->startpos[1]));
+    location.cmn_area.push_back(
+        std::make_pair(msg->waypoint[0], msg->waypoint[1]));
+    for (int i = 0; i < sizeof(msg->ownx) / sizeof(float); i++) {
+      location.own_area.push_back(std::make_pair(msg->ownx[i], msg->owny[i]));
+    }
+    for (int i = 0; i < sizeof(msg->cmnx) / sizeof(float); i++) {
+      location.cmn_area.push_back(std::make_pair(msg->cmnx[i], msg->cmny[i]));
+    }
+    for (int i = 0; i < sizeof(msg->shtx) / sizeof(float); i++) {
+      location.sht_area.push_back(std::make_pair(msg->shtx[i], msg->shty[i]));
+    }
+    for (int i = 0; i < sizeof(msg->stepperstate) / sizeof(float); i++) {
+      location.stepper_state.push_back(msg->stepperstate[i]);
+    }
+    handle.init(auto_cmd, side, msg->armoffset, msg->cmnoffset, msg->shtoffset,
+                location);
+  }
+  is_init = true;
 }
 
 void AutoCmdGenerator::update() {
   while (rclcpp::ok()) {
-    if (is_auto) {
-      auto_mode();
-    } else {
-      manual_mode();
+    if (is_init) {
+      if (is_auto) {
+        auto_mode();
+      } else {
+        manual_mode();
+      }
+      rclcpp::sleep_for(100ms);
     }
-    rclcpp::sleep_for(100ms);
   }
 }
 
