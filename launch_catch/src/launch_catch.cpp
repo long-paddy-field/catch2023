@@ -167,7 +167,6 @@ void ParameterManager::load_param() {
     buff.clear();
   }
   param_pub_->publish(msg);
-  RCLCPP_INFO(this->get_logger(), msg.isred ? "red" : "blue");
 }
 
 void ParameterManager::save_param() {

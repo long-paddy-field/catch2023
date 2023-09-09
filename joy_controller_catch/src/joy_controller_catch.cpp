@@ -7,7 +7,6 @@ using namespace std::chrono_literals;
 JoyControllerCatch::JoyControllerCatch() : Node("joy_controller_catch") {
   init_msg();
   init_btn();
-  config_params();
   move_command_publisher_ =
       this->create_publisher<principal_interfaces::msg::Movecommand>(
           "manual_move_command", 10);
@@ -18,6 +17,10 @@ JoyControllerCatch::JoyControllerCatch() : Node("joy_controller_catch") {
       this->create_publisher<std_msgs::msg::Bool>("is_auto", 10);
   joy_subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
       "joy", 10, std::bind(&JoyControllerCatch::joy_callback, this, _1));
+  param_subscriber =
+      this->create_subscription<principal_interfaces::msg::Parameters>(
+          "parameters", 10,
+          std::bind(&JoyControllerCatch::config_params, this, _1));
   timer_ = this->create_wall_timer(
       50ms, std::bind(&JoyControllerCatch::timer_callback, this));
 }
@@ -52,13 +55,11 @@ void JoyControllerCatch::init_btn() {
   buttons[static_cast<int>(BUTTONS::RC)] = ButtonManager(BUTTON_TYPE::PULSER);
   buttons[static_cast<int>(BUTTONS::LS)] = ButtonManager(BUTTON_TYPE::ON_OFF);
 }
-void JoyControllerCatch::config_params() {
-  this->declare_parameter("field_color", "red");
-  this->declare_parameter("vel_max", 1.0);
-  is_red =
-      (this->get_parameter("field_color").as_string() == "red") ? true : false;
-  vel_max = (float)this->get_parameter("vel_max").as_double();
-  RCLCPP_INFO(this->get_logger(), "field_color: %s", is_red ? "red" : "blue");
+void JoyControllerCatch::config_params(
+    const principal_interfaces::msg::Parameters::SharedPtr msg) {
+  is_red = msg->isred;
+  vel_max = msg->velmax;
+  is_initialized = true;
 }
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
@@ -85,7 +86,8 @@ void JoyControllerCatch::joy_callback(
 }
 
 void JoyControllerCatch::timer_callback() {
-  if (is_connected) {
+  RCLCPP_INFO(this->get_logger(), is_red ? "red" : "blue");
+  if (is_connected && is_initialized) {
     move_command_.rotate = buttons[static_cast<int>(BUTTONS::LB)] -
                            buttons[static_cast<int>(BUTTONS::RB)];
     state_command_.shift = buttons[static_cast<int>(BUTTONS::LC)] -
