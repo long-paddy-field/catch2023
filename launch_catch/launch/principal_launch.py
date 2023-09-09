@@ -8,7 +8,6 @@ import os
 
 def generate_launch_description():
 
-    field_color = LaunchConfiguration("field_color", default="blue")
     return LaunchDescription([
         Node(package="joy",
              executable="joy_node",
@@ -20,6 +19,10 @@ def generate_launch_description():
             package="joy_controller_catch",
             executable="joy_controller_catch",
             name="joy_controller",
+            parameters=[{
+                os.path.join(get_package_share_directory('launch_catch'),
+                             'config', 'config.yaml')
+            }]
         ),
         Node(
             package="converter_principal",

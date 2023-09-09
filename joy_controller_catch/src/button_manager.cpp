@@ -10,33 +10,38 @@ ButtonManager::ButtonManager(BUTTON_TYPE _button_type)
 
 void ButtonManager::set(bool btn) {
   rclcpp::Time mytime = rclcpp::Clock().now();
-  if (mytime.nanoseconds() - time_counter > 0.2 * 1E9 && btn != past_btn) {
-    on_off = !on_off;
-    push_release = btn;
-    time_counter = mytime.nanoseconds();
-  }
-  if (btn && !past_btn) {
-    pulser = true;
-  }
+  if (mytime.nanoseconds() - time_counter > 0.4 * 1E9)
+    if (btn != past_btn) {
+      on_off = !on_off;
+      push_release = btn;
+      time_counter = mytime.nanoseconds();
+      if (btn && !past_btn) {
+        pulser = true;
+      }
+    }
   past_btn = btn;
 }
 
 bool ButtonManager::read() {
   switch (button_type) {
-  case BUTTON_TYPE::ON_OFF:
-    return on_off;
-    break;
-  case BUTTON_TYPE::PUSH_RELEASE:
-    return push_release;
-    break;
-  case BUTTON_TYPE::PULSER:
-    if (pulser) {
-      pulser = false;
-      return true;
-    } else {
+    case BUTTON_TYPE::ON_OFF:
+      return on_off;
+      break;
+    case BUTTON_TYPE::PUSH_RELEASE:
+      return push_release;
+      break;
+    case BUTTON_TYPE::PULSER:
+      if (pulser) {
+        pulser = false;
+        return true;
+      } else {
+        return false;
+      }
+    default:
       return false;
-    }
-  default:
-    return false;
   }
+}
+
+void ButtonManager::get_past_btn() {
+  RCLCPP_INFO(node->get_logger(), past_btn ? "true" : "false");
 }

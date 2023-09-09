@@ -28,6 +28,8 @@ class JoyControllerCatch : public rclcpp::Node {
   void init_msg();
   // initialize button class
   void init_btn();
+  // get params
+  void config_params();
   // main routine
   void update();
 
@@ -46,9 +48,15 @@ class JoyControllerCatch : public rclcpp::Node {
   principal_interfaces::msg::Movecommand move_command_;
   principal_interfaces::msg::Statecommand state_command_;
   std_msgs::msg::Bool is_auto_;
-  ButtonManager buttons[14];
+
+  ButtonManager buttons[14];//ボタン
+  
   bool is_connected = false;
+  bool is_common_buff;// is_commonのやつ
+
+  // パラメータ
   float vel_max = 0;  // 手動での速度最大値
+  bool is_red = true;
 };
 
 }  // namespace catch2023_principal
