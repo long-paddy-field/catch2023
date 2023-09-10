@@ -1,7 +1,6 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
-from launch.substitutions import LaunchConfiguration
 
 import os
 
@@ -25,21 +24,20 @@ def generate_launch_description():
             executable="converter_principal",
             name="converter",
         ),
-        Node(
-            package="rogilink2",
-            executable="rogilink2",
-            name="rogilink2",
-            output="screen",
-            emulate_tty=True,
-            parameters=[{
-                "config_path":
-                os.path.join(
-                    get_package_share_directory("launch_catch"),
-                    "config",
-                    "rogilink.yaml",
-                )
-            }],
-        ),
+        Node(package="rogilink2",
+             executable="rogilink2",
+             name="rogilink2",
+             output="screen",
+             emulate_tty=True,
+             parameters=[{
+                 "config_path":
+                 os.path.join(
+                     get_package_share_directory("launch_catch"),
+                     "config",
+                     "rogilink.yaml",
+                 )
+             }],
+             arguments=['--ros-args', '--log-level', "warn"]),
         Node(
             package="launch_catch",
             executable="launch_catch",
@@ -49,6 +47,13 @@ def generate_launch_description():
                     get_package_share_directory("launch_catch"),
                     "config",
                     "config.yaml",
-                )}],
+                )
+            }],
+        ),
+        Node(
+            package="monitor_catch",
+            executable="monitor_catch",
+            name="monitor_catch",
+            output="screen",
         )
     ])
