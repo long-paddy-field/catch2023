@@ -10,11 +10,19 @@ AutoCmdGenerator::AutoCmdGenerator() : Node("auto_cmd_generator") {
   state_command_subscription =
       this->create_subscription<principal_interfaces::msg::Statecommand>(
           "state_command", 10,
-          [&](principal_interfaces::msg::Statecommand::SharedPtr stateCmd) {
-
+          [this](principal_interfaces::msg::Statecommand::SharedPtr stateCmd) {
+            this->change_state_flag = stateCmd->phaze_change == 1;
+            if (stateCmd->is_common == 1) {
+              if (this->is_cmn == false) is_cmn = true;
+            } else if (stateCmd->is_common == -1) {
+              if (this->is_cmn == true) is_cmn = false;
+            }
+            this->shift_flag = stateCmd->shift;
           });
   is_auto_subscription = this->create_subscription<std_msgs::msg::Bool>(
-      "is_auto", 10, [&, this](std_msgs::msg::Bool::SharedPtr isAuto) {this->is_auto = isAuto->data;});
+      "is_auto", 10, [&, this](std_msgs::msg::Bool::SharedPtr isAuto) {
+        this->is_auto = isAuto->data;
+      });
 
   auto_command_publisher =
       this->create_publisher<principal_interfaces::msg::Movecommand>(
@@ -60,8 +68,8 @@ void AutoCmdGenerator::update() {
     if (is_init) {
       if (is_auto) {
         auto_mode();
-      } else {
-        manual_mode();
+        // } else {
+        //   manual_mode();
       }
       rclcpp::sleep_for(100ms);
     }
@@ -80,9 +88,10 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToOwnWork:
-      if (true) {
+      if (shift_flag != 0) {
         // 左右十字が押されていたらずらすところ
-        own_area_index += 1;
+        own_area_index += shift_flag;
+        shift_flag = 0;
       }
       if (own_area_index == 1) {
         // 一個目のワークを取るときだけ例外
@@ -102,9 +111,10 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToCmnWork:
-      if (true) {
+      if (shift_flag != 0) {
         // 左右十字が押されていたらずらすところ
-        cmn_area_index += 1;
+        cmn_area_index += shift_flag;
+        shift_flag = 0;
       }
       handle.move_to(Area::Cmn, cmn_area_index, cmn_area_index % 3,
                      ZState::Trans, is_cmn);
@@ -127,6 +137,7 @@ void AutoCmdGenerator::auto_mode() {
         }
         change_state_flag = false;
       }
+      break;
     case StateName::CatchOwn:
       handle.move_to(ZState::OwnCatch);
       if (has_arrived_z()) {
@@ -153,14 +164,13 @@ void AutoCmdGenerator::auto_mode() {
           // 一個目か、保持しているワークの数が3つであれば
           state = StateName::MoveToWaypoint;
         } else {
-          if (true) {
+          if (is_cmn == false) {
             handle.move_to(Area::Cmn, cmn_area_index - 1,
                            (cmn_area_index - 1) % 3, ZState::CmnCatch, false);
-            is_cmn = false;
             if (has_arrived()) {
               state = StateName::MoveToCmnWork;
             }
-          } else if (false) {
+          } else if (shift_flag == 1) {
             // 右キーが押されたら
             state = StateName::MoveToCmnWork;
           }
@@ -177,7 +187,7 @@ void AutoCmdGenerator::auto_mode() {
         handle.move_to(Area::Sht, sht_area_index, 0, ZState::Trans,
                        true);  // ボーナスエリアの上空へ
       }
-      if (change_state_flag || has_arrived) {
+      if (change_state_flag || has_arrived()) {
         past_state = state;
         state = StateName::Release;
         change_state_flag = false;
@@ -220,7 +230,7 @@ void AutoCmdGenerator::auto_mode() {
 
 void manual_mode() {
   // 現在のアームの位置がどこにあるのかを計算し、どのステートに相当するかを推測
-  
+
   // そのステートに相当するところに移動する
 }
 
