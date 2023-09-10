@@ -5,7 +5,7 @@ launch_catch:
     arm_offset: 0.010
     cmn_offset: 0.015
     sht_offset: 0.015
-    stepper_state: [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+    stepper_state: [0.0,0.04,0.03,0.02,0.01,0.02,0.03,0.04,0.03]
     red_side:
       start_pos: [0.0, 0.0]
       way_point: [0.0, 0.0]

@@ -92,17 +92,17 @@ void JoyControllerCatch::joy_callback(
 }
 
 void JoyControllerCatch::timer_callback() {
-  
   if (is_initialized) {
     move_command_.rotate = buttons[static_cast<int>(BUTTONS::LB)] -
                            buttons[static_cast<int>(BUTTONS::RB)];
-    state_command_.shift = buttons[static_cast<int>(BUTTONS::LC)] -
-                           buttons[static_cast<int>(BUTTONS::RC)];
+    state_command_.shift =
+        (is_red ? -1 : 1) * buttons[static_cast<int>(BUTTONS::LC)] -
+        buttons[static_cast<int>(BUTTONS::RC)];
     state_command_.phaze_change = buttons[static_cast<int>(BUTTONS::START)] -
                                   buttons[static_cast<int>(BUTTONS::BACK)];
     state_command_.is_common = buttons[static_cast<int>(BUTTONS::UC)] -
                                buttons[static_cast<int>(BUTTONS::DC)];
-    
+
     is_auto_.data = buttons[static_cast<int>(BUTTONS::LT)];
 
     if (buttons[static_cast<int>(BUTTONS::A)]) {

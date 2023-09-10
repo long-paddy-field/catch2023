@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "principal_interfaces/msg/movecommand.hpp"
-#include "principal_interfaces/msg/statecommand.hpp"
 #include "principal_interfaces/msg/parameters.hpp"
+#include "principal_interfaces/msg/statecommand.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "state.hpp"
 #include "std_msgs/msg/bool.hpp"
@@ -36,9 +36,10 @@ class AutoCmdGenerator : public rclcpp::Node {
   bool change_state_flag = false;
   StateName state = StateName::Init;       // 現在の状態
   StateName past_state = StateName::Init;  // 一つ前の状態
-  Side side = Side::Red;                  // 現在のサイド
+  Side side = Side::Red;                   // 現在のサイド
   bool is_cmn = false;  // 共通エリアに侵入できるかどうか
-  bool is_init = false; //パラメタの読み取りが終わったかどうか
+  bool is_init = false;  // パラメタの読み取りが終わったかどうか
+  int shift_flag = 0;
 
   principal_interfaces::msg::Movecommand auto_cmd;
   principal_interfaces::msg::Movecommand::SharedPtr current_pos;

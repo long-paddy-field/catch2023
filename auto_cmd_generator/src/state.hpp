@@ -32,7 +32,6 @@ typedef struct WORKLOCATION {
 
 class GeneralCommand {
  public:
-  GeneralCommand();
   void init(principal_interfaces::msg::Movecommand &_msg, Side _side,
             float _arm_offset, float _cmn_offset, float _sht_offset,
             WORKLOCATION _location);

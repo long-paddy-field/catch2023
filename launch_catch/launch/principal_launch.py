@@ -50,5 +50,10 @@ def generate_launch_description():
                     "config",
                     "config.yaml",
                 )}],
+        ),
+        Node(
+            package="auto_cmd_generator",
+            executable="auto_cmd_generator",
+            name="auto_cmd_generator",
         )
     ])
