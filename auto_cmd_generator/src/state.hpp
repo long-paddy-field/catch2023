@@ -32,8 +32,8 @@ typedef struct WORKLOCATION {
 
 class GeneralCommand {
  public:
-  void init(principal_interfaces::msg::Movecommand &_msg, Side _side,
-            float _arm_offset, float _cmn_offset, float _sht_offset,
+  GeneralCommand(principal_interfaces::msg::Movecommand& _msg) : msg(_msg){};
+  void init(Side _side, float _arm_offset, float _cmn_offset, float _sht_offset,
             WORKLOCATION _location);
   void move_to(Area area, int num, int hand, ZState z_state,
                bool is_cmn = false);
@@ -42,7 +42,7 @@ class GeneralCommand {
   void release();
 
  private:
-  principal_interfaces::msg::Movecommand msg;
+  principal_interfaces::msg::Movecommand& msg;
   WORKLOCATION
   location;  // 行くべき座標の塊。own_area[0]は競技開始位置、cmn_area[0]は共通エリアでのウェイポイントであることに注意
   Side side;

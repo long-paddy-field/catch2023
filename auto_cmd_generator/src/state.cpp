@@ -1,10 +1,8 @@
 #include "state.hpp"
 using namespace catch2023_principal;
 
-void GeneralCommand::init(principal_interfaces::msg::Movecommand &_msg,
-                          Side _side, float _arm_offset, float _cmn_offset,
+void GeneralCommand::init(Side _side, float _arm_offset, float _cmn_offset,
                           float _sht_offset, WORKLOCATION _location) {
-  msg = _msg;
   side = _side;
   arm_offset = _arm_offset;
   cmn_offset = _cmn_offset;

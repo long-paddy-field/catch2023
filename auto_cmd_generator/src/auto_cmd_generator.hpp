@@ -20,6 +20,8 @@ class AutoCmdGenerator : public rclcpp::Node {
   AutoCmdGenerator();
   ~AutoCmdGenerator(){};
 
+  void update();
+
  private:
   std::pair<float, float> start_pos;
   std::pair<float, float> way_point;
@@ -56,7 +58,6 @@ class AutoCmdGenerator : public rclcpp::Node {
 
   GeneralCommand handle;
 
-  void update();
   void auto_mode();
   void manual_mode();
   void spinsleep(int ms);

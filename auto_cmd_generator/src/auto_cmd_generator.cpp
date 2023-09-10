@@ -6,7 +6,8 @@ using namespace catch2023_principal;
 using namespace std::chrono_literals;
 using namespace std::placeholders;
 
-AutoCmdGenerator::AutoCmdGenerator() : Node("auto_cmd_generator") {
+AutoCmdGenerator::AutoCmdGenerator()
+    : Node("auto_cmd_generator"), handle(auto_cmd) {
   state_command_subscription =
       this->create_subscription<principal_interfaces::msg::Statecommand>(
           "state_command", 10,
@@ -57,8 +58,7 @@ void AutoCmdGenerator::reflect_param(
     for (int i = 0; i < sizeof(msg->stepperstate) / sizeof(float); i++) {
       location.stepper_state.push_back(msg->stepperstate[i]);
     }
-    handle.init(auto_cmd, side, msg->armoffset, msg->cmnoffset, msg->shtoffset,
-                location);
+    handle.init(side, msg->armoffset, msg->cmnoffset, msg->shtoffset, location);
   }
   is_init = true;
 }
@@ -71,12 +71,14 @@ void AutoCmdGenerator::update() {
         // } else {
         //   manual_mode();
       }
-      rclcpp::sleep_for(100ms);
     }
+    rclcpp::spin_some(this->shared_from_this());
+    rclcpp::sleep_for(100ms);
   }
 }
 
 void AutoCmdGenerator::auto_mode() {
+  RCLCPP_INFO(this->get_logger(), "auto_cmd: auto_mode");
   switch (state) {
     case StateName::Init:
       handle.move_to(Area::Own, 0, 1,
@@ -225,6 +227,8 @@ void AutoCmdGenerator::auto_mode() {
       break;
   }
   auto_command_publisher->publish(auto_cmd);
+  RCLCPP_INFO(this->get_logger(), "auto_cmd is published: %d",
+              static_cast<int>(state));
   rclcpp::sleep_for(100ms);
 }
 
@@ -259,7 +263,8 @@ bool AutoCmdGenerator::has_arrived_z() {
 
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<AutoCmdGenerator>());
+  auto node = std::make_shared<AutoCmdGenerator>();
+  node->update();
   rclcpp::shutdown();
   return 0;
 }
