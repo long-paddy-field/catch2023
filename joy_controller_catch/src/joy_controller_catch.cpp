@@ -75,7 +75,6 @@ void JoyControllerCatch::joy_callback(
   buttons[static_cast<int>(BUTTONS::LC)].set(msg->axes[4] < -0.9);
   buttons[static_cast<int>(BUTTONS::RC)].set(msg->axes[4] > 0.9);
   buttons[static_cast<int>(BUTTONS::UC)].set(msg->axes[5] > 0.9);
-  RCLCPP_INFO(this->get_logger(), msg->axes[5] > 0.9 ? "nya" : "");
   buttons[static_cast<int>(BUTTONS::DC)].set(msg->axes[5] < -0.9);
 
   for (int i = 4; i < 12; i++) {
@@ -93,7 +92,7 @@ void JoyControllerCatch::joy_callback(
 }
 
 void JoyControllerCatch::timer_callback() {
-  // RCLCPP_INFO(this->get_logger(), is_red ? "red" : "blue");
+  
   if (is_initialized) {
     move_command_.rotate = buttons[static_cast<int>(BUTTONS::LB)] -
                            buttons[static_cast<int>(BUTTONS::RB)];
@@ -103,9 +102,7 @@ void JoyControllerCatch::timer_callback() {
                                   buttons[static_cast<int>(BUTTONS::BACK)];
     state_command_.is_common = buttons[static_cast<int>(BUTTONS::UC)] -
                                buttons[static_cast<int>(BUTTONS::DC)];
-    // RCLCPP_INFO(
-    //     this->get_logger(),
-    //     buttons[static_cast<int>(BUTTONS::UC)].pulser ? "true" : "false");
+    
     is_auto_.data = buttons[static_cast<int>(BUTTONS::LT)];
 
     if (buttons[static_cast<int>(BUTTONS::A)]) {
