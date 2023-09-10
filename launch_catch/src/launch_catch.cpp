@@ -11,12 +11,13 @@ ParameterManager::ParameterManager() : Node("parameter_manager") {
   //     "current_state", 10,
   //     std::bind(&ParameterManager::get_state, this, std::placeholders::_1));
   load_param();
+  timer_ = this->create_wall_timer(
+      50ms, std::bind(&ParameterManager::send_param, this));
 }
 
 ParameterManager::~ParameterManager() { save_param(); }
 
 void ParameterManager::load_param() {
-  principal_interfaces::msg::Parameters msg;
   // declare_parameters
   this->declare_parameter("field_color", "red");
   this->declare_parameter("max_vel", 1.0);
@@ -25,6 +26,8 @@ void ParameterManager::load_param() {
   this->declare_parameter("sht_offset", 1.0);
   this->declare_parameter("stepper_state", std::vector<double>(9, 0.0));
   msg.isred = (this->get_parameter("field_color").as_string() == "red");
+  RCLCPP_INFO(this->get_logger(), "field_color: %s",
+              msg.isred ? "red" : "blue");
   msg.velmax = (float)this->get_parameter("max_vel").as_double();
   msg.armoffset = (float)this->get_parameter("arm_offset").as_double();
   msg.cmnoffset = (float)this->get_parameter("cmn_offset").as_double();
@@ -166,9 +169,14 @@ void ParameterManager::load_param() {
     }
     buff.clear();
   }
-  param_pub_->publish(msg);
+  is_init = true;
 }
 
+void ParameterManager::send_param() {
+  if (is_init) {
+    param_pub_->publish(msg);
+  }
+}
 void ParameterManager::save_param() {
   // save param to yaml
   RCLCPP_INFO(this->get_logger(), "Saving parameters to yaml...");

@@ -14,7 +14,7 @@ AutoCmdGenerator::AutoCmdGenerator() : Node("auto_cmd_generator") {
 
           });
   is_auto_subscription = this->create_subscription<std_msgs::msg::Bool>(
-      "is_auto", 10, [&, this](std_msgs::msg::Bool::SharedPtr isAuto) {});
+      "is_auto", 10, [&, this](std_msgs::msg::Bool::SharedPtr isAuto) {this->is_auto = isAuto->data;});
 
   auto_command_publisher =
       this->create_publisher<principal_interfaces::msg::Movecommand>(
@@ -220,6 +220,7 @@ void AutoCmdGenerator::auto_mode() {
 
 void manual_mode() {
   // 現在のアームの位置がどこにあるのかを計算し、どのステートに相当するかを推測
+  
   // そのステートに相当するところに移動する
 }
 

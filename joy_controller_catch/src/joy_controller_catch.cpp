@@ -57,9 +57,12 @@ void JoyControllerCatch::init_btn() {
 }
 void JoyControllerCatch::config_params(
     const principal_interfaces::msg::Parameters::SharedPtr msg) {
-  is_red = msg->isred;
-  vel_max = msg->velmax;
-  is_initialized = true;
+  if (!is_initialized) {
+    RCLCPP_INFO(this->get_logger(), "config_params");
+    is_red = msg->isred;
+    vel_max = msg->velmax;
+    is_initialized = true;
+  }
 }
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
@@ -86,7 +89,7 @@ void JoyControllerCatch::joy_callback(
 }
 
 void JoyControllerCatch::timer_callback() {
-  RCLCPP_INFO(this->get_logger(), is_red ? "red" : "blue");
+  // RCLCPP_INFO(this->get_logger(), is_red ? "red" : "blue");
   if (is_connected && is_initialized) {
     move_command_.rotate = buttons[static_cast<int>(BUTTONS::LB)] -
                            buttons[static_cast<int>(BUTTONS::RB)];
