@@ -22,6 +22,7 @@ install(
   PROGRAMS
   launch/principal_launch.py
   launch/rogilink_launch.py
+  launch/simulate_launch.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

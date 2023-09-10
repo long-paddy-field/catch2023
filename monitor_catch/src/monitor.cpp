@@ -31,11 +31,11 @@ void Monitor::update() {
   sensor_msgs::msg::JointState msg;
   msg.header.stamp = this->get_clock()->now();
   msg.name.push_back("lower_platform");
-  msg.position.push_back(current_pos.y);
+  msg.position.push_back(current_pos.x);
   msg.name.push_back("platform_middle");
-  msg.position.push_back(current_pos.x / 2.0);
+  msg.position.push_back(current_pos.y / 2.0);
   msg.name.push_back("middle_end");
-  msg.position.push_back(current_pos.x / 2.0);
+  msg.position.push_back(current_pos.y / 2.0);
 
   msg.name.push_back("end_wrest");
   msg.position.push_back(current_pos.z);

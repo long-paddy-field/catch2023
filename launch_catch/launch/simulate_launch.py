@@ -1,13 +1,12 @@
-import os
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from ament_index_python.packages import get_package_share_directory
+from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument
+import os
 
 
 def generate_launch_description():
-
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
 
     urdf = os.path.join(
@@ -15,8 +14,34 @@ def generate_launch_description():
         "urdf", "robot_arm.urdf")
     with open(urdf, 'r') as infp:
         robot_desc = infp.read()
-
     return LaunchDescription([
+        Node(package="joy",
+             executable="joy_node",
+             name="joy",
+             parameters=[{
+                 "deadzone": 0.005
+             }]),
+        Node(
+            package="joy_controller_catch",
+            executable="joy_controller_catch",
+            name="joy_controller",
+        ),
+        Node(
+            package="dummy_robot_catch",
+            executable="dummy_robot_catch",
+            name="dummy_robot_catch",
+        ),
+        Node(
+            package="launch_catch",
+            executable="launch_catch",
+            name="launch_catch",
+            parameters=[{
+                os.path.join(
+                    get_package_share_directory("launch_catch"),
+                    "config",
+                    "config.yaml",
+                )}],
+        ),
         DeclareLaunchArgument(
             'use_sim_time',
             default_value='false',
@@ -45,16 +70,5 @@ def generate_launch_description():
             executable='rviz2',
             name='rviz2',
             arguments=['-d' + os.path.join(get_package_share_directory('monitor_catch'), 'rviz2', 'robot_arm.rviz')]
-        ),
-        Node(package="joy", executable="joy_node", name="joy"),
-        Node(
-            package="joy_controller_catch",
-            executable="joy_controller_catch",
-            name="joy_controller",
-        ),
-        Node(
-            package="dummy_robot_catch",
-            executable="dummy_robot_catch",
-            name="dummy_robot_catch",
         ),
     ])
