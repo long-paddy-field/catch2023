@@ -58,9 +58,12 @@ void Converter::manual_command_callback(
     } else if (movecommand.rotate < -1) {
       movecommand.rotate = -1;
     }
-    movecommand.hand[0] = msg->hand[0];
-    movecommand.hand[1] = msg->hand[1];
-    movecommand.hand[2] = msg->hand[2];
+    movecommand.hand[0] =
+        msg->hand[0] ? !movecommand.hand[0] : movecommand.hand[0];
+    movecommand.hand[1] =
+        msg->hand[1] ? !movecommand.hand[1] : movecommand.hand[1];
+    movecommand.hand[2] =
+        msg->hand[2] ? !movecommand.hand[2] : movecommand.hand[2];
   }
 }
 

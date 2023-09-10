@@ -38,9 +38,12 @@ void DummyRobot::manual_command_callback(
     movecommand.y = msg->y;
     movecommand.z = msg->z;
     movecommand.rotate = msg->rotate;
-    movecommand.hand[0] = msg->hand[0];
-    movecommand.hand[1] = msg->hand[1];
-    movecommand.hand[2] = msg->hand[2];
+    movecommand.hand[0] =
+        msg->hand[0] ? !movecommand.hand[0] : movecommand.hand[0];
+    movecommand.hand[1] =
+        msg->hand[1] ? !movecommand.hand[1] : movecommand.hand[1];
+    movecommand.hand[2] =
+        msg->hand[2] ? !movecommand.hand[2] : movecommand.hand[2];
   }
 }
 

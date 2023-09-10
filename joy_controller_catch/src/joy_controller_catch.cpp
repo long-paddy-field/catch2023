@@ -38,10 +38,10 @@ void JoyControllerCatch::init_msg() {
   move_command_.hand[2] = false;
 }
 void JoyControllerCatch::init_btn() {
-  buttons[static_cast<int>(BUTTONS::X)] = ButtonManager(BUTTON_TYPE::ON_OFF);
+  buttons[static_cast<int>(BUTTONS::X)] = ButtonManager(BUTTON_TYPE::PULSER);
   buttons[static_cast<int>(BUTTONS::A)] = ButtonManager(BUTTON_TYPE::PULSER);
-  buttons[static_cast<int>(BUTTONS::B)] = ButtonManager(BUTTON_TYPE::ON_OFF);
-  buttons[static_cast<int>(BUTTONS::Y)] = ButtonManager(BUTTON_TYPE::ON_OFF);
+  buttons[static_cast<int>(BUTTONS::B)] = ButtonManager(BUTTON_TYPE::PULSER);
+  buttons[static_cast<int>(BUTTONS::Y)] = ButtonManager(BUTTON_TYPE::PULSER);
   buttons[static_cast<int>(BUTTONS::START)] =
       ButtonManager(BUTTON_TYPE::PULSER);
   buttons[static_cast<int>(BUTTONS::BACK)] = ButtonManager(BUTTON_TYPE::PULSER);
@@ -67,7 +67,7 @@ void JoyControllerCatch::config_params(
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
   is_connected = true;
-  float slow = msg->buttons[static_cast<int>(BUTTONS::RT)] ? 0.25 : 1.0;
+  float slow = msg->buttons[static_cast<int>(BUTTONS::RT)] ? 0.25 : vel_max;
   move_command_.x = (is_red ? -1 : 1) * vel_max * msg->axes[0] * slow;
   move_command_.y = (is_red ? 1 : -1) * vel_max * msg->axes[1] * slow;
   move_command_.z = vel_max * msg->axes[3] * slow;
@@ -98,6 +98,7 @@ void JoyControllerCatch::timer_callback() {
     state_command_.phaze_change = buttons[static_cast<int>(BUTTONS::START)] -
                                   buttons[static_cast<int>(BUTTONS::BACK)];
     state_command_.is_common = buttons[static_cast<int>(BUTTONS::LS)];
+    is_auto_.data = buttons[static_cast<int>(BUTTONS::LT)];
     // RCLCPP_INFO(this->get_logger(),
     //             buttons[static_cast<int>(BUTTONS::UC)] ? "true" : "false");
 
@@ -107,11 +108,15 @@ void JoyControllerCatch::timer_callback() {
       move_command_.hand[1] = buttons[static_cast<int>(BUTTONS::Y)];
       move_command_.hand[2] = buttons[static_cast<int>(BUTTONS::B)];
     }
+    if (is_auto_.data) {
+      move_command_.x = 0;
+      move_command_.y = 0;
+      move_command_.z = 0;
+    }
     move_command_publisher_->publish(move_command_);
     state_command_publisher_->publish(state_command_);
     is_auto_publisher_->publish(is_auto_);
   }
-
   is_connected = false;
 }
 
