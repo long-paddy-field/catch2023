@@ -52,10 +52,20 @@ void RailCatch::send_cmd_vel(float cmd) {
     float index = 0.5;
     float cmd_vel = index * cmd / belt_ratio + (1 - index) * past_vel_output;
     if (cmd_vel > 0) {
-      odrive.setPosition(lower_limit / belt_ratio);
+      cmd_vel =
+          std::min(cmd_vel, vel_limit / belt_ratio *
+                                (1 - exp(arg * (get_pos() - upper_limit))));
+    } else if (cmd_vel < 0) {
+      cmd_vel = std::max(cmd_vel,
+                         vel_limit / belt_ratio *
+                             (-1 + exp(-1 * arg * (get_pos() - lower_limit))));
+    }
+
+    if (cmd_vel > 0) {
+      odrive.setPosition(upper_limit / belt_ratio);
       odrive.setLimits(cmd_vel, 30);
     } else if (cmd_vel < 0) {
-      odrive.setPosition(upper_limit / belt_ratio);
+      odrive.setPosition(lower_limit / belt_ratio);
       odrive.setLimits(-cmd_vel, 30);
     } else {
       odrive.setPosition(odrive.getPosition());

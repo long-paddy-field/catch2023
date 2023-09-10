@@ -4,8 +4,8 @@ using namespace std::placeholders;
 
 Converter::Converter()
     : Node("converter"),
-      lower(this, "X", 0, 1.1, 1.8, 0.14, 0, is_auto),
-      middle(this, "Y", -0.2, 0.2, 2, 0.21, 0, is_auto),
+      lower(this, "X", 0, 1.1, 1.8, 0.14, 3, is_auto),
+      middle(this, "Y", -0.79, 0.79, 2.2, 0.21, 1.5, is_auto),
       arm(this, "arm") {
   // subscriberの初期設定
   movecommand.x = 0;
