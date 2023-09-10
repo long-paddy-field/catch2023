@@ -30,7 +30,8 @@ class JoyControllerCatch : public rclcpp::Node {
   // initialize button class
   void init_btn();
   // get params
-  void config_params(const principal_interfaces::msg::Parameters::SharedPtr msg);
+  void config_params(
+      const principal_interfaces::msg::Parameters::SharedPtr msg);
   // main routine
   void update();
 
@@ -52,7 +53,7 @@ class JoyControllerCatch : public rclcpp::Node {
   principal_interfaces::msg::Statecommand state_command_;
   std_msgs::msg::Bool is_auto_;
 
-  ButtonManager buttons[14];  // ボタン
+  ButtonManager buttons[static_cast<int>(BUTTONS::BUTTON_NUM)];  // ボタン
 
   bool is_connected = false;
   bool is_initialized = false;

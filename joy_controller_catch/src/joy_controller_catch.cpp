@@ -22,7 +22,7 @@ JoyControllerCatch::JoyControllerCatch() : Node("joy_controller_catch") {
           "parameters", 10,
           std::bind(&JoyControllerCatch::config_params, this, _1));
   timer_ = this->create_wall_timer(
-      50ms, std::bind(&JoyControllerCatch::timer_callback, this));
+      100ms, std::bind(&JoyControllerCatch::timer_callback, this));
 }
 void JoyControllerCatch::init_msg() {
   move_command_.x = 0;
@@ -53,7 +53,8 @@ void JoyControllerCatch::init_btn() {
       ButtonManager(BUTTON_TYPE::PUSH_RELEASE);
   buttons[static_cast<int>(BUTTONS::LC)] = ButtonManager(BUTTON_TYPE::PULSER);
   buttons[static_cast<int>(BUTTONS::RC)] = ButtonManager(BUTTON_TYPE::PULSER);
-  buttons[static_cast<int>(BUTTONS::LS)] = ButtonManager(BUTTON_TYPE::ON_OFF);
+  buttons[static_cast<int>(BUTTONS::UC)] = ButtonManager(BUTTON_TYPE::PULSER);
+  buttons[static_cast<int>(BUTTONS::DC)] = ButtonManager(BUTTON_TYPE::PULSER);
 }
 void JoyControllerCatch::config_params(
     const principal_interfaces::msg::Parameters::SharedPtr msg) {
@@ -66,7 +67,6 @@ void JoyControllerCatch::config_params(
 }
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
-  is_connected = true;
   float slow = msg->buttons[static_cast<int>(BUTTONS::RT)] ? 0.25 : vel_max;
   move_command_.x = (is_red ? -1 : 1) * vel_max * msg->axes[0] * slow;
   move_command_.y = (is_red ? 1 : -1) * vel_max * msg->axes[1] * slow;
@@ -74,6 +74,10 @@ void JoyControllerCatch::joy_callback(
 
   buttons[static_cast<int>(BUTTONS::LC)].set(msg->axes[4] < -0.9);
   buttons[static_cast<int>(BUTTONS::RC)].set(msg->axes[4] > 0.9);
+  buttons[static_cast<int>(BUTTONS::UC)].set(msg->axes[5] > 0.9);
+  RCLCPP_INFO(this->get_logger(), msg->axes[5] > 0.9 ? "nya" : "");
+  buttons[static_cast<int>(BUTTONS::DC)].set(msg->axes[5] < -0.9);
+
   for (int i = 4; i < 12; i++) {
     buttons[i].set(msg->buttons[i]);
   }
@@ -90,17 +94,19 @@ void JoyControllerCatch::joy_callback(
 
 void JoyControllerCatch::timer_callback() {
   // RCLCPP_INFO(this->get_logger(), is_red ? "red" : "blue");
-  if (is_connected && is_initialized) {
+  if (is_initialized) {
     move_command_.rotate = buttons[static_cast<int>(BUTTONS::LB)] -
                            buttons[static_cast<int>(BUTTONS::RB)];
     state_command_.shift = buttons[static_cast<int>(BUTTONS::LC)] -
                            buttons[static_cast<int>(BUTTONS::RC)];
     state_command_.phaze_change = buttons[static_cast<int>(BUTTONS::START)] -
                                   buttons[static_cast<int>(BUTTONS::BACK)];
-    state_command_.is_common = buttons[static_cast<int>(BUTTONS::LS)];
+    state_command_.is_common = buttons[static_cast<int>(BUTTONS::UC)] -
+                               buttons[static_cast<int>(BUTTONS::DC)];
+    // RCLCPP_INFO(
+    //     this->get_logger(),
+    //     buttons[static_cast<int>(BUTTONS::UC)].pulser ? "true" : "false");
     is_auto_.data = buttons[static_cast<int>(BUTTONS::LT)];
-    // RCLCPP_INFO(this->get_logger(),
-    //             buttons[static_cast<int>(BUTTONS::UC)] ? "true" : "false");
 
     if (buttons[static_cast<int>(BUTTONS::A)]) {
     } else {
@@ -116,8 +122,9 @@ void JoyControllerCatch::timer_callback() {
     move_command_publisher_->publish(move_command_);
     state_command_publisher_->publish(state_command_);
     is_auto_publisher_->publish(is_auto_);
+  } else {
+    RCLCPP_INFO(this->get_logger(), "not initialized");
   }
-  is_connected = false;
 }
 
 int main(int argc, char *argv[]) {

@@ -1,3 +1,3 @@
 int8 phaze_change
 int8 shift
-bool is_common
+int8 is_common

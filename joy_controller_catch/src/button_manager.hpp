@@ -20,14 +20,15 @@ enum class BUTTONS {
   RC = 13,
   UC = 14,
   DC = 15,
+  BUTTON_NUM = 16,
 };
 enum class BUTTON_TYPE {
-  ON_OFF = 0,       // 押すたびにON(TRUE)-OFF(FALSE)切り替え
-  PUSH_RELEASE = 1, // 押しているとON(TRUE),離すとOFF(FALSE）
-  PULSER = 2,       // 押したら1回だけパルス出る
+  ON_OFF = 0,        // 押すたびにON(TRUE)-OFF(FALSE)切り替え
+  PUSH_RELEASE = 1,  // 押しているとON(TRUE),離すとOFF(FALSE）
+  PULSER = 2,        // 押したら1回だけパルス出る
 };
 class ButtonManager {
-public:
+ public:
   // constructor
   ButtonManager(){};
   ButtonManager(BUTTON_TYPE _button_type);
@@ -38,6 +39,8 @@ public:
   bool read();
   void get_past_btn();
   operator bool() { return read(); };
+  bool past_btn = false;
+  bool pulser = false;
 
  private:
   // member variables
@@ -45,8 +48,6 @@ public:
   rclcpp::Node *node;
   bool on_off = false;
   bool push_release = false;
-  bool pulser = false;
   double time_counter = 0;
-  bool past_btn = false;
 };
-}; // namespace catch2023_principal
+};  // namespace catch2023_principal
