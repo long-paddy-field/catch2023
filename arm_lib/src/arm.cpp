@@ -50,4 +50,4 @@ void Arm::timerCallback() {
   pub->publish(frame2);
 }
 
-float Arm::getZPos() { return currentZPos; }
+float Arm::getZPos() { return currentZPos / STEP_PER_METER; }

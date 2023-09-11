@@ -17,13 +17,13 @@ enum class Side { Blue, Red };
 enum class Area { Own, Cmn, Sht };
 enum class ZState { Trans, OwnCatch, OwnTrans, CmnCatch, CmnTrans, Shoot };
 
-typedef struct LOCATION {
+struct LOCATION {
   float x;
   float y;
   float z;
 };  // 位置
 
-typedef struct WORKLOCATION {
+struct WORKLOCATION {
   std::vector<std::pair<float, float>> own_area;  // 自陣エリアのワークxy座標
   std::vector<std::pair<float, float>> cmn_area;  // 共有エリアのワークxy座標
   std::vector<std::pair<float, float>> sht_area;  // ボーナスエリアのxy座標

@@ -46,16 +46,16 @@ void AutoCmdGenerator::reflect_param(
         std::make_pair(msg->startpos[0], msg->startpos[1]));
     location.cmn_area.push_back(
         std::make_pair(msg->waypoint[0], msg->waypoint[1]));
-    for (int i = 0; i < sizeof(msg->ownx) / sizeof(float); i++) {
+    for (size_t i = 0; i < sizeof(msg->ownx) / sizeof(float); i++) {
       location.own_area.push_back(std::make_pair(msg->ownx[i], msg->owny[i]));
     }
-    for (int i = 0; i < sizeof(msg->cmnx) / sizeof(float); i++) {
+    for (size_t i = 0; i < sizeof(msg->cmnx) / sizeof(float); i++) {
       location.cmn_area.push_back(std::make_pair(msg->cmnx[i], msg->cmny[i]));
     }
-    for (int i = 0; i < sizeof(msg->shtx) / sizeof(float); i++) {
+    for (size_t i = 0; i < sizeof(msg->shtx) / sizeof(float); i++) {
       location.sht_area.push_back(std::make_pair(msg->shtx[i], msg->shty[i]));
     }
-    for (int i = 0; i < sizeof(msg->stepperstate) / sizeof(float); i++) {
+    for (size_t i = 0; i < sizeof(msg->stepperstate) / sizeof(float); i++) {
       location.stepper_state.push_back(msg->stepperstate[i]);
     }
     handle.init(side, msg->armoffset, msg->cmnoffset, msg->shtoffset, location);
