@@ -25,10 +25,6 @@ void Monitor::current_pos_callback(
   current_pos.y = msg->y;
   current_pos.z = msg->z;
   current_pos.rotate = (msg->rotate + 1) * M_PI_2;
-  RCLCPP_INFO_STREAM(this->get_logger(),
-                     "current-> x: " << current_pos.x << " y: " << current_pos.y
-                                     << " z: " << current_pos.z
-                                     << " rotate: " << current_pos.rotate);
 }
 
 void Monitor::update() {

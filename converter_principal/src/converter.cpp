@@ -100,11 +100,6 @@ void Converter::send_command() {
     manual_movecommand.hand[0] = auto_movecommand.hand[0];
     manual_movecommand.hand[1] = auto_movecommand.hand[1];
     manual_movecommand.hand[2] = auto_movecommand.hand[2];
-    RCLCPP_INFO_STREAM(
-        this->get_logger(),
-        "command-> x: " << auto_movecommand.x << ", y: " << auto_movecommand.y
-                        << ", z: " << auto_movecommand.z
-                        << ", rotate: " << auto_movecommand.rotate);
   } else {
     lower.send_cmd_vel(manual_movecommand.x);
     middle.send_cmd_vel(manual_movecommand.y);
@@ -112,12 +107,6 @@ void Converter::send_command() {
     arm.setArmAngle(static_cast<Arm::ArmAngle>(manual_movecommand.rotate));
     arm.setHand(manual_movecommand.hand[0], manual_movecommand.hand[1],
                 manual_movecommand.hand[2]);
-    RCLCPP_INFO_STREAM(
-        this->get_logger(),
-        "command-> x: " << manual_movecommand.x
-                        << ", y: " << manual_movecommand.y
-                        << ", z: " << manual_movecommand.z
-                        << ", rotate: " << manual_movecommand.rotate);
   }
 }
 void Converter::send_tf() {

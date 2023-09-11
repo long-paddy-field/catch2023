@@ -126,10 +126,14 @@ void AutoCmdGenerator::auto_mode() {
       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_cmn_work");
       if (shift_flag != 0) {
         // 左右十字が押されていたらずらすところ
-        cmn_area_index += shift_flag;
+        if (cmn_area_index != 1 && shift_flag < 0) {
+          cmn_area_index += shift_flag;
+        } else if (cmn_area_index != 9 && shift_flag > 0) {
+          cmn_area_index += shift_flag;
+        }
         shift_flag = 0;
       }
-      handle.move_to(Area::Cmn, cmn_area_index, cmn_area_index % 3,
+      handle.move_to(Area::Cmn, (cmn_area_index - 1) % 3, cmn_area_index,
                      ZState::Trans, is_cmn);
       if (change_state_flag || (has_arrived() && is_cmn)) {
         // change_stateが押されたか、共通エリア上空に到着したら次へ
@@ -155,15 +159,21 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::CatchOwn:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: catch_own");
       handle.move_to(ZState::OwnCatch);
-      if (has_arrived_z()) {
-        handle.grasp(Area::Own, own_area_index % 3);
-        own_area_index += 1;
+      if (has_arrived_z() || change_state_flag) {
+        if (own_area_index == 1) {
+          handle.grasp(Area::Own, side == Side::Red ? 0 : 2);
+        } else {
+          handle.grasp(Area::Own, own_area_index % 3);
+        }
         spinsleep(2000);
+        change_state_flag = false;
         if (own_area_index == 1 || own_area_index % 3 == 0) {
           // 一個目か、保持しているワークの数が3つであれば
+          own_area_index += 1;
           state = StateName::MoveToShoot;
         } else {
           // 違ったら
+          own_area_index += 1;
           state = StateName::MoveToOwnWork;
         }
       }
@@ -171,24 +181,27 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::CatchCmn:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: catch_cmn");
       handle.move_to(ZState::CmnCatch);
-      if (has_arrived_z()) {
+      if (has_arrived_z() || change_state_flag) {
         handle.grasp(Area::Cmn, cmn_area_index);
-        cmn_area_index += 1;
-        spinsleep(2000000);
+
+        spinsleep(2000);
         past_state = state;
-        if (cmn_area_index % 3 == 1) {
+        if (cmn_area_index % 3 == 0 && cmn_area_index != 0) {
           // 一個目か、保持しているワークの数が3つであれば
+          cmn_area_index += 1;
           state = StateName::MoveToWaypoint;
         } else {
           if (is_cmn == false) {
-            handle.move_to(Area::Cmn, cmn_area_index - 1,
-                           (cmn_area_index - 1) % 3, ZState::CmnCatch, false);
-            if (has_arrived()) {
+            handle.move_to(Area::Cmn, (cmn_area_index - 1) % 3,
+                           cmn_area_index - 1, ZState::CmnCatch, false);
+            if (has_arrived_xy()) {
               state = StateName::MoveToCmnWork;
+              cmn_area_index += 1;
             }
           } else if (shift_flag == 1) {
             // 右キーが押されたら
             state = StateName::MoveToCmnWork;
+            cmn_area_index += 1;
           }
         }
       }
@@ -197,11 +210,11 @@ void AutoCmdGenerator::auto_mode() {
       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_shoot");
       if (sht_area_index % 2 == 0) {
         // シュートした回数が偶数なら
-        handle.move_to(Area::Sht, sht_area_index, 0, ZState::Trans,
+        handle.move_to(Area::Sht, 1, sht_area_index, ZState::Trans,
                        false);  // ボーナスエリアの手前へ
       } else {
         // シュートした回数が奇数なら
-        handle.move_to(Area::Sht, sht_area_index, 0, ZState::Trans,
+        handle.move_to(Area::Sht, 1, sht_area_index, ZState::Trans,
                        true);  // ボーナスエリアの上空へ
       }
       if (change_state_flag || has_arrived()) {
@@ -213,10 +226,11 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::Release:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: release");
       handle.move_to(ZState::Shoot);  // まず下げる
-      if (has_arrived_z()) {
-        if (sht_area_index % 2 == 0) {
+      if (has_arrived_z() || change_state_flag) {
+        if (sht_area_index % 2 == 1 || sht_area_index == 0) {
           // シュートした回数が偶数なら
           handle.release();
+          change_state_flag = false;
           sht_area_index += 1;
           past_state = state;
           if (cmn_area_index <= 10) {
@@ -263,7 +277,8 @@ void AutoCmdGenerator::spinsleep(int ms) {
 }
 
 bool AutoCmdGenerator::has_arrived() {
-  return has_arrived_xy() && has_arrived_z();
+  // return has_arrived_xy() && has_arrived_z();
+  return false;
 }
 
 bool AutoCmdGenerator::has_arrived_xy() {
@@ -276,7 +291,8 @@ bool AutoCmdGenerator::has_arrived_xy() {
 bool AutoCmdGenerator::has_arrived_z() {
   float error =
       sqrt((auto_cmd.z - current_pos->z) * (auto_cmd.z - current_pos->z));
-  return error < 0.005;
+  // return error < 0.005;
+  return false;
 }
 
 int main(int argc, char* argv[]) {
