@@ -70,6 +70,12 @@ void AutoCmdGenerator::update() {
         auto_mode();
         // } else {
         //   manual_mode();
+        RCLCPP_INFO_STREAM(
+            this->get_logger(),
+            "auto_cmd-> own_index: " << own_area_index
+                                     << ", cmn_index: " << cmn_area_index
+                                     << ", sht_index: " << sht_area_index
+                                     << ", state: " << static_cast<int>(state));
       }
     }
     rclcpp::spin_some(this->shared_from_this());
@@ -88,6 +94,7 @@ void AutoCmdGenerator::auto_mode() {
         past_state = state;
         state = StateName::MoveToOwnWork;
         change_state_flag = false;
+        own_area_index = 1;
       }
       break;
     case StateName::MoveToOwnWork:
@@ -237,7 +244,7 @@ void AutoCmdGenerator::auto_mode() {
   auto_command_publisher->publish(auto_cmd);
   RCLCPP_INFO(this->get_logger(), "auto_cmd is published: %d",
               static_cast<int>(state));
-  rclcpp::sleep_for(100ms);
+  // rclcpp::sleep_for(100ms);
 }
 
 void manual_mode() {
