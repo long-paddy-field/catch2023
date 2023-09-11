@@ -88,7 +88,7 @@ void AutoCmdGenerator::auto_mode() {
   switch (state) {
     case StateName::Init:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: init");
-      handle.move_to(Area::Own, 0, 1,
+      handle.move_to(Area::Own, 1, 0,
                      ZState::Trans);  // 後で初期位置を代入
       if (change_state_flag) {
         past_state = state;
@@ -157,7 +157,7 @@ void AutoCmdGenerator::auto_mode() {
       if (has_arrived_z()) {
         handle.grasp(Area::Own, own_area_index % 3);
         own_area_index += 1;
-        spinsleep(2000000);
+        spinsleep(2000);
         if (own_area_index == 1 || own_area_index % 3 == 0) {
           // 一個目か、保持しているワークの数が3つであれば
           state = StateName::MoveToShoot;
@@ -266,13 +266,15 @@ bool AutoCmdGenerator::has_arrived() {
 }
 
 bool AutoCmdGenerator::has_arrived_xy() {
-  float error = (auto_cmd.x - current_pos->x) * (auto_cmd.x - current_pos->x) +
-                (auto_cmd.y - current_pos->y) * (auto_cmd.y - current_pos->y);
+  float error =
+      sqrt((auto_cmd.x - current_pos->x) * (auto_cmd.x - current_pos->x)) +
+      sqrt((auto_cmd.y - current_pos->y) * (auto_cmd.y - current_pos->y));
   return error < 0.005;
 }
 
 bool AutoCmdGenerator::has_arrived_z() {
-  float error = (auto_cmd.z - current_pos->z) * (auto_cmd.z - current_pos->z);
+  float error =
+      sqrt((auto_cmd.z - current_pos->z) * (auto_cmd.z - current_pos->z));
   return error < 0.005;
 }
 

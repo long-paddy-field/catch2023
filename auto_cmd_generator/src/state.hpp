@@ -35,7 +35,7 @@ class GeneralCommand {
   GeneralCommand(principal_interfaces::msg::Movecommand& _msg) : msg(_msg){};
   void init(Side _side, float _arm_offset, float _cmn_offset, float _sht_offset,
             WORKLOCATION _location);
-  void move_to(Area area, int num, int hand, ZState z_state,
+  void move_to(Area area, int hand, int num, ZState z_state,
                bool is_cmn = false);
   void move_to(ZState z_state);
   void grasp(Area area, int n);

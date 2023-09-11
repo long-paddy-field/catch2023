@@ -17,7 +17,7 @@ void GeneralCommand::init(Side _side, float _arm_offset, float _cmn_offset,
   msg.hand[2] = false;
 }
 
-void GeneralCommand::move_to(Area area, int num, int hand, ZState z_state,
+void GeneralCommand::move_to(Area area, int hand, int num, ZState z_state,
                              bool is_advance) {
   switch (area) {
     case Area::Cmn:

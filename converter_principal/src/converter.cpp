@@ -116,8 +116,8 @@ void Converter::send_command() {
 }
 void Converter::send_tf() {
   principal_interfaces::msg::Movecommand msg;
-  msg.x = middle.get_pos();
-  msg.y = lower.get_pos();
+  msg.x = lower.get_pos();
+  msg.y = middle.get_pos();
   msg.z = arm.getZPos();
   msg.rotate = is_auto ? auto_movecommand.rotate : manual_movecommand.rotate;
   msg.hand[0] = is_auto ? auto_movecommand.hand[0] : manual_movecommand.hand[0];
