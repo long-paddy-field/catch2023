@@ -32,8 +32,6 @@ class JoyControllerCatch : public rclcpp::Node {
   // get params
   void config_params(
       const principal_interfaces::msg::Parameters::SharedPtr msg);
-  // main routine
-  void update();
 
   // callback function
   void joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg);

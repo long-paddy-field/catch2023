@@ -12,9 +12,12 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(principal_interfaces REQUIRED)
+find_package(backward_ros REQUIRED)
 
 add_executable(joy_controller_catch src/joy_controller_catch.cpp src/button_manager.cpp)
 ament_target_dependencies(joy_controller_catch rclcpp std_msgs principal_interfaces sensor_msgs geometry_msgs)
+
+add_backward(joy_controller_catch)
 
 install(TARGETS
   joy_controller_catch

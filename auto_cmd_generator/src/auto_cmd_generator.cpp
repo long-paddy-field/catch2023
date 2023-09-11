@@ -58,7 +58,8 @@ void AutoCmdGenerator::reflect_param(
     for (size_t i = 0; i < sizeof(msg->stepperstate) / sizeof(float); i++) {
       location.stepper_state.push_back(msg->stepperstate[i]);
     }
-    handle.init(side, msg->armoffset, msg->cmnoffset, msg->shtoffset, location);
+    handle.init(side, msg->armoffset, msg->cmnoffset, msg->shtoffset,
+                msg->handoffset, location);
   }
   is_init = true;
 }

@@ -112,6 +112,12 @@ void Converter::send_command() {
     arm.setArmAngle(static_cast<Arm::ArmAngle>(manual_movecommand.rotate));
     arm.setHand(manual_movecommand.hand[0], manual_movecommand.hand[1],
                 manual_movecommand.hand[2]);
+    RCLCPP_INFO_STREAM(
+        this->get_logger(),
+        "command-> x: " << manual_movecommand.x
+                        << ", y: " << manual_movecommand.y
+                        << ", z: " << manual_movecommand.z
+                        << ", rotate: " << manual_movecommand.rotate);
   }
 }
 void Converter::send_tf() {

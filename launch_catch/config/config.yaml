@@ -2,9 +2,10 @@ launch_catch:
   ros__parameters:
     field_color: "red"
     vel_max: 1.0
-    arm_offset: 0.010
-    cmn_offset: -0.150
-    sht_offset: 0.110
+    arm_offset: 0.05 # 把持同士の間隔
+    cmn_offset: -0.150 # 共通エリアと共通待機の間隔
+    sht_offset: 0.110 # ボーナスエリアとノーマルエリアの間隔
+    hand_offset: 0.0463 # 回転中心と把持中心の距離
     stepper_state: [0.0,0.04,0.03,0.02,0.01,0.02,0.03,0.04,0.03]
     red_side:
       start_pos: [0.0, 0.5]
