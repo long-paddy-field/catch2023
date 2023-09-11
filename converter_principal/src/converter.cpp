@@ -8,13 +8,20 @@ Converter::Converter()
       middle(this, "Y", -0.79, 0.79, 2.2, 0.21, 1.5, is_auto),
       arm(this, "arm") {
   // subscriberの初期設定
-  movecommand.x = 0;
-  movecommand.y = 0;
-  movecommand.z = 0;
-  movecommand.rotate = 0;
-  movecommand.hand[0] = false;
-  movecommand.hand[1] = false;
-  movecommand.hand[2] = false;
+  manual_movecommand.x = 0;
+  manual_movecommand.y = 0;
+  manual_movecommand.z = 0;
+  manual_movecommand.rotate = 0;
+  manual_movecommand.hand[0] = false;
+  manual_movecommand.hand[1] = false;
+  manual_movecommand.hand[2] = false;
+  auto_movecommand.x = 0;
+  auto_movecommand.y = 0;
+  auto_movecommand.z = 0;
+  auto_movecommand.rotate = 0;
+  auto_movecommand.hand[0] = false;
+  auto_movecommand.hand[1] = false;
+  auto_movecommand.hand[2] = false;
   RCLCPP_INFO(this->get_logger(), "start_init");
   lower.init_odrive();
   middle.init_odrive();
@@ -51,61 +58,66 @@ Converter::Converter()
 void Converter::manual_command_callback(
     const principal_interfaces::msg::Movecommand::SharedPtr msg) {
   if (!is_auto) {
-    movecommand.x = msg->x;
-    movecommand.y = msg->y;
-    movecommand.z = msg->z;
-    movecommand.rotate -= msg->rotate;
-    if (movecommand.rotate > 1) {
-      movecommand.rotate = 1;
-    } else if (movecommand.rotate < -1) {
-      movecommand.rotate = -1;
+    manual_movecommand.x = msg->x;
+    manual_movecommand.y = msg->y;
+    manual_movecommand.z = msg->z;
+    manual_movecommand.rotate -= msg->rotate;
+    if (manual_movecommand.rotate > 1) {
+      manual_movecommand.rotate = 1;
+    } else if (manual_movecommand.rotate < -1) {
+      manual_movecommand.rotate = -1;
     }
-    movecommand.hand[0] =
-        msg->hand[0] ? !movecommand.hand[0] : movecommand.hand[0];
-    movecommand.hand[1] =
-        msg->hand[1] ? !movecommand.hand[1] : movecommand.hand[1];
-    movecommand.hand[2] =
-        msg->hand[2] ? !movecommand.hand[2] : movecommand.hand[2];
+    manual_movecommand.hand[0] =
+        msg->hand[0] ? !manual_movecommand.hand[0] : manual_movecommand.hand[0];
+    manual_movecommand.hand[1] =
+        msg->hand[1] ? !manual_movecommand.hand[1] : manual_movecommand.hand[1];
+    manual_movecommand.hand[2] =
+        msg->hand[2] ? !manual_movecommand.hand[2] : manual_movecommand.hand[2];
   }
 }
 
 void Converter::auto_command_callback(
     const principal_interfaces::msg::Movecommand::SharedPtr msg) {
   if (is_auto) {
-    movecommand.x = msg->x;
-    movecommand.y = msg->y;
-    movecommand.z = msg->z;
-    movecommand.rotate = msg->rotate;
-    movecommand.hand[0] = msg->hand[0];
-    movecommand.hand[1] = msg->hand[1];
-    movecommand.hand[2] = msg->hand[2];
+    auto_movecommand.x = msg->x;
+    auto_movecommand.y = msg->y;
+    auto_movecommand.z = msg->z;
+    auto_movecommand.rotate = msg->rotate;
+    auto_movecommand.hand[0] = msg->hand[0];
+    auto_movecommand.hand[1] = msg->hand[1];
+    auto_movecommand.hand[2] = msg->hand[2];
   }
 }
 
 void Converter::send_command() {
   if (is_auto) {
-    lower.send_cmd_pos(movecommand.y);
-    middle.send_cmd_pos(movecommand.x);
-    arm.setZPos(movecommand.z);
+    lower.send_cmd_pos(auto_movecommand.x);
+    middle.send_cmd_pos(auto_movecommand.y);
+    arm.setZPos(auto_movecommand.z);
+    arm.setArmAngle(static_cast<Arm::ArmAngle>(auto_movecommand.rotate));
+    arm.setHand(auto_movecommand.hand[0], auto_movecommand.hand[1],
+                auto_movecommand.hand[2]);
+    manual_movecommand.hand[0] = auto_movecommand.hand[0];
+    manual_movecommand.hand[1] = auto_movecommand.hand[1];
+    manual_movecommand.hand[2] = auto_movecommand.hand[2];
   } else {
-    lower.send_cmd_vel(movecommand.y);
-    middle.send_cmd_vel(movecommand.x);
-    arm.setZVel(movecommand.z);
+    lower.send_cmd_vel(manual_movecommand.x);
+    middle.send_cmd_vel(manual_movecommand.y);
+    arm.setZVel(manual_movecommand.z);
+    arm.setArmAngle(static_cast<Arm::ArmAngle>(manual_movecommand.rotate));
+    arm.setHand(manual_movecommand.hand[0], manual_movecommand.hand[1],
+                manual_movecommand.hand[2]);
   }
-  arm.setArmAngle(static_cast<Arm::ArmAngle>(movecommand.rotate));
-  arm.setHand(movecommand.hand[0], movecommand.hand[1], movecommand.hand[2]);
-  RCLCPP_INFO(this->get_logger(), "command-> x: %f, y: %f, z: %f",
-              movecommand.x, movecommand.y, movecommand.z);
 }
 void Converter::send_tf() {
   principal_interfaces::msg::Movecommand msg;
   msg.x = middle.get_pos();
   msg.y = lower.get_pos();
   msg.z = arm.getZPos();
-  msg.rotate = movecommand.rotate;
-  msg.hand[0] = movecommand.hand[0];
-  msg.hand[1] = movecommand.hand[1];
-  msg.hand[2] = movecommand.hand[2];
+  msg.rotate = is_auto ? auto_movecommand.rotate : manual_movecommand.rotate;
+  msg.hand[0] = is_auto ? auto_movecommand.hand[0] : manual_movecommand.hand[0];
+  msg.hand[1] = is_auto ? auto_movecommand.hand[1] : manual_movecommand.hand[1];
+  msg.hand[2] = is_auto ? auto_movecommand.hand[2] : manual_movecommand.hand[2];
   current_pos_publisher->publish(msg);
 }
 

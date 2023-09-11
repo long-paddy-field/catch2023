@@ -81,6 +81,7 @@ void AutoCmdGenerator::auto_mode() {
   RCLCPP_INFO(this->get_logger(), "auto_cmd: auto_mode");
   switch (state) {
     case StateName::Init:
+      RCLCPP_INFO(this->get_logger(), "auto_cmd: init");
       handle.move_to(Area::Own, 0, 1,
                      ZState::Trans);  // 後で初期位置を代入
       if (change_state_flag) {
@@ -90,6 +91,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToOwnWork:
+      RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_own_work");
       if (shift_flag != 0) {
         // 左右十字が押されていたらずらすところ
         own_area_index += shift_flag;
@@ -113,6 +115,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToCmnWork:
+      RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_cmn_work");
       if (shift_flag != 0) {
         // 左右十字が押されていたらずらすところ
         cmn_area_index += shift_flag;
@@ -128,6 +131,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToWaypoint:
+      RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_waypoint");
       handle.move_to(Area::Cmn, 0, 0, ZState::Trans);
       if (change_state_flag || has_arrived()) {
         if (past_state == StateName::Release) {
@@ -141,6 +145,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::CatchOwn:
+      RCLCPP_INFO(this->get_logger(), "auto_cmd: catch_own");
       handle.move_to(ZState::OwnCatch);
       if (has_arrived_z()) {
         handle.grasp(Area::Own, own_area_index % 3);
@@ -156,6 +161,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::CatchCmn:
+      RCLCPP_INFO(this->get_logger(), "auto_cmd: catch_cmn");
       handle.move_to(ZState::CmnCatch);
       if (has_arrived_z()) {
         handle.grasp(Area::Cmn, cmn_area_index);
@@ -180,6 +186,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToShoot:
+      RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_shoot");
       if (sht_area_index % 2 == 0) {
         // シュートした回数が偶数なら
         handle.move_to(Area::Sht, sht_area_index, 0, ZState::Trans,
@@ -196,6 +203,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::Release:
+      RCLCPP_INFO(this->get_logger(), "auto_cmd: release");
       handle.move_to(ZState::Shoot);  // まず下げる
       if (has_arrived_z()) {
         if (sht_area_index % 2 == 0) {

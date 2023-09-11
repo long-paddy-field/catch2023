@@ -45,7 +45,8 @@ class Converter : public rclcpp::Node {
   RailCatch lower;
   RailCatch middle;
   Arm arm;
-  MOVECOMMAND movecommand;
+  MOVECOMMAND manual_movecommand;
+  MOVECOMMAND auto_movecommand;
   bool is_auto = false;
   rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
       manual_command_subscription;

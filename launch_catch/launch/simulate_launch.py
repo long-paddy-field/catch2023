@@ -32,6 +32,11 @@ def generate_launch_description():
             name="dummy_robot_catch",
         ),
         Node(
+            package="auto_cmd_generator",
+            executable="auto_cmd_generator",
+            name="auto_cmd_generator",
+        ),
+        Node(
             package="launch_catch",
             executable="launch_catch",
             name="launch_catch",
