@@ -28,7 +28,7 @@
     <link name="end_effector_link">
         <visual>
             <geometry>
-                <box size="0.1 0.4 0.12"/>
+                <box size="0.4 0.1 0.12"/>
             </geometry>
         </visual>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
@@ -44,7 +44,7 @@
     <link name="hand_link">
         <visual>
             <geometry>
-                <box size="0.1 0.2 0.1"/>
+                <box size="0.1 0.15 0.1"/>
             </geometry>
         </visual>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
@@ -77,21 +77,21 @@
     <joint name="middle_end" type="prismatic">
         <parent link="middle_module_link"/>
         <child link="end_effector_link"/>
-        <origin xyz="0 0.21 0" rpy="0 0 0"/>
+        <origin xyz="0.21 0 0" rpy="0 0 0"/>
         <limit lower="-0.414425" upper="0.414425" effort="2.00" velocity="2.00"/>
         <axis xyz="0 1 0"/>
     </joint>
     <joint name="end_wrest" type="prismatic">
         <parent link="end_effector_link"/>
         <child link="wrest_link"/>
-        <origin xyz="0 0.25 0" rpy="0 0 0"/>
+        <origin xyz="0.25 0 0" rpy="0 0 0"/>
         <limit lower="-0.606" upper="0.606" effort="2.00" velocity="2.00"/>
         <axis xyz="0 0 1"/>
     </joint>
     <joint name="wrest_hand" type="revolute">
         <parent link="wrest_link"/>
         <child link="hand_link"/>
-        <origin xyz="0 0.1 -0.15" rpy="0 0 0"/>
+        <origin xyz="0.1 0 -0.15" rpy="0 0 0"/>
         <limit lower="-1.57" upper="1.57" effort="2.00" velocity="2.00"/>
         <axis xyz="0 0 1"/>
     </joint>

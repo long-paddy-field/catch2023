@@ -25,7 +25,7 @@ void GeneralCommand::move_to(Area area, int hand, int num, ZState z_state,
     case Area::Cmn:
       if (side == Side::Red) {
         msg.x = location.cmn_area[num].first + arm_offset * (1 - hand);
-        msg.y = location.cmn_area[num].second + (is_advance ? cmn_offset : 0) -
+        msg.y = location.cmn_area[num].second - (is_advance ? cmn_offset : 0) -
                 hand_offset;
         msg.z = location.stepper_state[static_cast<int>(z_state)];
         msg.rotate = 1;
