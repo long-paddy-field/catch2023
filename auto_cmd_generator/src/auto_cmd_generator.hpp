@@ -42,6 +42,7 @@ class AutoCmdGenerator : public rclcpp::Node {
   bool is_cmn = false;  // 共通エリアに侵入できるかどうか
   bool is_init = false;  // パラメタの読み取りが終わったかどうか
   int shift_flag = 0;
+  int next_choice = 0; // リリースしたあとどっちに行くか
 
   principal_interfaces::msg::Movecommand auto_cmd;
   principal_interfaces::msg::Movecommand::SharedPtr current_pos;
