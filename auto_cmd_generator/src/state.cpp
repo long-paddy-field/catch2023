@@ -61,9 +61,9 @@ void GeneralCommand::move_to(ZState z_state) {
 void GeneralCommand::grasp(Area area, int n) {
   if (area == Area::Cmn) {
     if (side == Side::Blue) {
-      msg.hand[n] = true;
-    } else if (side == Side::Red) {
       msg.hand[2 - n] = true;
+    } else if (side == Side::Red) {
+      msg.hand[n] = true;
     }
   } else {
     msg.hand[n] = true;

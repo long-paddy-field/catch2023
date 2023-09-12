@@ -36,6 +36,11 @@ AutoCmdGenerator::AutoCmdGenerator()
           });
   param_sub = this->create_subscription<principal_interfaces::msg::Parameters>(
       "parameters", 10, std::bind(&AutoCmdGenerator::reflect_param, this, _1));
+  timer_ = this->create_wall_timer(100ms, [this]() {
+    this->auto_command_publisher->publish(auto_cmd);
+    RCLCPP_INFO(this->get_logger(), "auto_cmd is published: %d",
+                static_cast<int>(state));
+  });
 }
 void AutoCmdGenerator::reflect_param(
     const principal_interfaces::msg::Parameters::SharedPtr msg) {
@@ -182,9 +187,13 @@ void AutoCmdGenerator::auto_mode() {
       RCLCPP_INFO(this->get_logger(), "auto_cmd: catch_cmn");
       handle.move_to(ZState::CmnCatch);
       if (has_arrived_z() || change_state_flag) {
-        handle.grasp(Area::Cmn, cmn_area_index);
-
-        spinsleep(2000);
+        change_state_flag = false;
+        if (auto_cmd.hand[side == Side::Red
+                              ? (cmn_area_index - 1) % 3
+                              : (2 - ((cmn_area_index - 1) % 3))] == false) {
+          handle.grasp(Area::Cmn, (cmn_area_index - 1) % 3);
+          spinsleep(2000);
+        }
         past_state = state;
         if (cmn_area_index % 3 == 0 && cmn_area_index != 0) {
           // 一個目か、保持しているワークの数が3つであれば
@@ -192,8 +201,8 @@ void AutoCmdGenerator::auto_mode() {
           state = StateName::MoveToWaypoint;
         } else {
           if (is_cmn == false) {
-            handle.move_to(Area::Cmn, (cmn_area_index - 1) % 3,
-                           cmn_area_index - 1, ZState::CmnCatch, false);
+            handle.move_to(Area::Cmn, cmn_area_index % 3, cmn_area_index,
+                           ZState::CmnCatch, false);
             if (has_arrived_xy()) {
               state = StateName::MoveToCmnWork;
               cmn_area_index += 1;
@@ -256,9 +265,8 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
   }
-  auto_command_publisher->publish(auto_cmd);
-  RCLCPP_INFO(this->get_logger(), "auto_cmd is published: %d",
-              static_cast<int>(state));
+  // auto_command_publisher->publish(auto_cmd);
+
   // rclcpp::sleep_for(100ms);
 }
 

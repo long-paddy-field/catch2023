@@ -55,6 +55,7 @@ class AutoCmdGenerator : public rclcpp::Node {
       current_pos_subscription;
   rclcpp::Subscription<principal_interfaces::msg::Parameters>::SharedPtr
       param_sub;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   GeneralCommand handle;
 
