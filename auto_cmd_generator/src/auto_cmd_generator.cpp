@@ -138,7 +138,7 @@ void AutoCmdGenerator::auto_mode() {
         }
         spinsleep(2000);
         change_state_flag = false;
-        if (own_area_index == 1 || own_area_index % 3 == 0) {
+        if (own_area_index == 1 || own_area_index % 3 == 1) {
           // 一個目か、保持しているワークの数が3つであれば
           own_area_index += 1;
           past_state = state;
@@ -184,7 +184,7 @@ void AutoCmdGenerator::auto_mode() {
       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_cmn_wait");
       handle.move_to(Area::Cmn, (hold_count) % 3, cmn_area_index,
                      ZState::CmnAbove, false);
-      if (has_arrived() && is_cmn) {
+      if (has_arrived() || is_cmn) {  // TODO &&に変えないと実機で止まる
         past_state = state;
         state = StateName::MoveToCmnWork;
       }
@@ -192,8 +192,13 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::MoveToCmnWork:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_cmn_work");
-      handle.move_to(Area::Cmn, hold_count % 3, cmn_area_index,
-                     ZState::CmnAbove, true);
+      if (cmn_area_index == 9) {
+        handle.move_to(Area::Cmn, 2, cmn_area_index, ZState::CmnAbove, true);
+
+      } else {
+        handle.move_to(Area::Cmn, hold_count % 3, cmn_area_index,
+                       ZState::CmnAbove, true);
+      }
       if (change_state_flag || has_arrived()) {
         // change_stateが押されたか、共通エリア上空に到着したら次へ
         past_state = state;
@@ -210,7 +215,7 @@ void AutoCmdGenerator::auto_mode() {
         if (auto_cmd.hand[side == Side::Red ? hold_count % 3
                                             : (2 - (hold_count % 3))] ==
             false) {
-          handle.grasp(Area::Cmn, (cmn_area_index - 1) % 3);
+          handle.grasp(Area::Cmn, hold_count % 3);
           spinsleep(2000);
         } else {
           if (is_cmn && shift_flag != 0) {
@@ -284,13 +289,15 @@ void AutoCmdGenerator::auto_mode() {
       if (auto_cmd.hand[0] || auto_cmd.hand[1] || auto_cmd.hand[2]) {
         handle.release();
         sht_area_index++;
-        hold_count == 0;
+        hold_count = 0;
       } else {
         handle.move_to(ZState::ShtAbove);
-        if (has_arrived_z()) {
+        if (has_arrived_z() || change_state_flag) {
+          change_state_flag = false;
           if (next_choice == 1) {
             past_state = state;
             state = StateName::MoveToWaypoint;
+            is_cmn = false;
           } else if (next_choice == -1) {
             past_state = state;
             state = StateName::MoveToOwnWork;
