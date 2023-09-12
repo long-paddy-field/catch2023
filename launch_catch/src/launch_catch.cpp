@@ -34,6 +34,11 @@ void ParameterManager::load_param() {
   msg.cmnoffset = (float)this->get_parameter("cmn_offset").as_double();
   msg.shtoffset = (float)this->get_parameter("sht_offset").as_double();
   msg.handoffset = (float)this->get_parameter("hand_offset").as_double();
+  std::vector<double> buff_f =
+      this->get_parameter("stepper_state").as_double_array();
+  for (int i = 0; i < 9; i++) {
+    msg.stepperstate[i] = buff_f[i];
+  }
   if (msg.isred) {
     this->declare_parameter("red_side.start_pos", std::vector<double>(2, 0.0));
     this->declare_parameter("red_side.way_point", std::vector<double>(2, 0.0));
