@@ -47,7 +47,7 @@ class GeneralCommand {
  public:
   GeneralCommand(principal_interfaces::msg::Movecommand& _msg) : msg(_msg){};
   void init(Side _side, float _arm_offset, float _cmn_offset, float _sht_offset,
-            float _hand_offset, WORKLOCATION _location);
+            float _hand_offset, float _finger_offset, WORKLOCATION _location);
   void move_to(Area area, int hand, int num, ZState z_state,
                bool is_cmn = false);
   void move_to(ZState z_state);
@@ -64,6 +64,7 @@ class GeneralCommand {
   float cmn_offset;
   float sht_offset;
   float hand_offset;
+  float finger_offset;
 };
 
 }  // namespace catch2023_principal

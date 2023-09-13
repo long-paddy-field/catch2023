@@ -25,6 +25,7 @@ void ParameterManager::load_param() {
   this->declare_parameter("cmn_offset", 1.0);
   this->declare_parameter("sht_offset", 1.0);
   this->declare_parameter("hand_offset", 1.0);
+  this->declare_parameter("finger_offset", 1.0);
   this->declare_parameter("stepper_state", std::vector<double>(9, 0.0));
   msg.isred = (this->get_parameter("field_color").as_string() == "red");
   RCLCPP_INFO(this->get_logger(), "field_color: %s",
@@ -34,6 +35,7 @@ void ParameterManager::load_param() {
   msg.cmnoffset = (float)this->get_parameter("cmn_offset").as_double();
   msg.shtoffset = (float)this->get_parameter("sht_offset").as_double();
   msg.handoffset = (float)this->get_parameter("hand_offset").as_double();
+  msg.fingeroffset = (float)this->get_parameter("finger_offset").as_double();
   std::vector<double> buff_f =
       this->get_parameter("stepper_state").as_double_array();
   for (int i = 0; i < 9; i++) {

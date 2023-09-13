@@ -5,6 +5,7 @@ float32 armoffset
 float32 cmnoffset
 float32 shtoffset
 float32 handoffset
+float32 fingeroffset
 float32[9] stepperstate
 
 # field_data

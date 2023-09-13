@@ -68,9 +68,12 @@ void JoyControllerCatch::config_params(
 void JoyControllerCatch::joy_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
   float slow = msg->buttons[static_cast<int>(BUTTONS::RT)] ? 0.25 : vel_max;
-  move_command_.x = (is_red ? -1 : 1) * vel_max * msg->axes[0] * slow;
-  move_command_.y = (is_red ? 1 : -1) * vel_max * msg->axes[1] * slow;
-  move_command_.z = vel_max * msg->axes[3] * slow;
+  float x_buff = fabs(msg->axes[0]) < 0.05 ? 0 : msg->axes[0];
+  float y_buff = fabs(msg->axes[1]) < 0.05 ? 0 : msg->axes[1];
+  float z_buff = fabs(msg->axes[3]) < 0.05 ? 0 : msg->axes[3];
+  move_command_.x = (is_red ? -1 : 1) * vel_max * x_buff * slow;
+  move_command_.y = (is_red ? 1 : -1) * vel_max * y_buff * slow;
+  move_command_.z = vel_max * z_buff * slow;
 
   buttons[static_cast<int>(BUTTONS::LC)].set(msg->axes[4] < -0.9);
   buttons[static_cast<int>(BUTTONS::RC)].set(msg->axes[4] > 0.9);

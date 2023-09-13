@@ -14,6 +14,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Movecommand.msg"
   "msg/Statecommand.msg"
   "msg/Parameters.msg"
+  "msg/Stateinfo.msg"
   "action/Commandpos.action"
   "srv/Commandvel.srv"
 )

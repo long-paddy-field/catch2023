@@ -65,7 +65,7 @@ void AutoCmdGenerator::reflect_param(
       location.stepper_state.push_back(msg->stepperstate[i]);
     }
     handle.init(side, msg->armoffset, msg->cmnoffset, msg->shtoffset,
-                msg->handoffset, location);
+                msg->handoffset, msg->fingeroffset, location);
   }
   is_init = true;
 }
@@ -118,7 +118,7 @@ void AutoCmdGenerator::auto_mode() {
         handle.move_to(Area::Own, side == Side::Red ? 0 : 2, 1,
                        ZState::OwnGiri);
       } else {
-        handle.move_to(Area::Own, own_area_index % 3, own_area_index,
+        handle.move_to(Area::Own, (own_area_index + 1) % 3, own_area_index,
                        ZState::OwnGiri);
       }
       if (change_state_flag || has_arrived()) {
@@ -254,7 +254,7 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::MoveToShotBox:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_shoot");
-      handle.move_to(Area::Sht, 1, 0, ZState::ShtGiri);
+      handle.move_to(Area::Sht, 1, 0, ZState::ShtGiri, true);
       if (change_state_flag || has_arrived()) {
         past_state = state;
         state = StateName::MoveToRelease;
