@@ -92,6 +92,7 @@ void AutoCmdGenerator::update() {
 
 void AutoCmdGenerator::auto_mode() {
   RCLCPP_INFO(this->get_logger(), "auto_cmd: auto_mode");
+  float past_x = auto_cmd.x;
   switch (state) {
     case StateName::Init:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: init");
@@ -127,6 +128,31 @@ void AutoCmdGenerator::auto_mode() {
         change_state_flag = false;
       }
       break;
+    case StateName::MoveOwnY:
+      handle.move_to(Area::Own, (own_area_index + 1) % 3, own_area_index,
+                     ZState::OwnCatch);
+      auto_cmd.x = past_x;
+
+      if (change_state_flag || has_arrived()) {
+        past_state = state;
+        state = StateName::MoveOwnX;
+        change_state_flag = false;
+      }
+      break;
+    case StateName::MoveOwnX:
+      handle.move_to(Area::Own, (own_area_index + 1) % 3, own_area_index,
+                     ZState::OwnCatch);
+      if (next_choice == -1) {
+        past_state = state;
+        state = StateName::MoveToOwnWork;
+        change_state_flag = false;
+      }
+      if (change_state_flag || has_arrived()) {
+        past_state = state;
+        state = StateName::CatchOwn;
+        change_state_flag = false;
+      }
+      break;
     case StateName::CatchOwn:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: catch_own");
       handle.move_to(ZState::OwnCatch);
@@ -147,7 +173,7 @@ void AutoCmdGenerator::auto_mode() {
           // 違ったら
           own_area_index += 1;
           past_state = state;
-          state = StateName::MoveToOwnWork;
+          state = StateName::MoveOwnY;
         }
       }
       break;
