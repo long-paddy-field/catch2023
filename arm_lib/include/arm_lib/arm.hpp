@@ -11,7 +11,7 @@
 using namespace std::placeholders;
 using namespace std::chrono_literals;
 
-constexpr float STEP_PER_ROTATE = 200;
+constexpr float STEP_PER_ROTATE = 400;
 constexpr float METER_PER_ROTATE = 40 * M_PI / 3 / 1000;
 constexpr float STEP_PER_METER = STEP_PER_ROTATE / METER_PER_ROTATE;
 
