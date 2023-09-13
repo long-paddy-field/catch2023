@@ -311,9 +311,8 @@ void AutoCmdGenerator::auto_mode() {
   // rclcpp::sleep_for(100ms);
 }
 
-void manual_mode() {
+void AutoCmdGenerator::manual_mode() {
   // 現在のアームの位置がどこにあるのかを計算し、どのステートに相当するかを推測
-
   // そのステートに相当するところに移動する
 }
 
