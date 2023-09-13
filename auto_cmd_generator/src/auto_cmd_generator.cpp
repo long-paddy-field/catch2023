@@ -134,7 +134,7 @@ void AutoCmdGenerator::auto_mode() {
         if (own_area_index == 1) {
           handle.grasp(Area::Own, side == Side::Red ? 0 : 2);
         } else {
-          handle.grasp(Area::Own, own_area_index % 3);
+          handle.grasp(Area::Own, (own_area_index + 1) % 3);
         }
         spinsleep(2000);
         change_state_flag = false;
