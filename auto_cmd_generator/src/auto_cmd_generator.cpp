@@ -154,7 +154,7 @@ void AutoCmdGenerator::auto_mode() {
           // 一個目か、保持しているワークの数が3つであれば
           own_area_index += 1;
           past_state = state;
-          state = StateName::MoveToShotBox;
+          state = StateName::CatchAbove;
         } else {
           // 違ったら
           own_area_index += 1;
@@ -168,8 +168,13 @@ void AutoCmdGenerator::auto_mode() {
       handle.move_to(ZState::OwnGiri);
       if (has_arrived_z() || change_state_flag) {
         change_state_flag = false;
-        past_state = state;
-        state = StateName::MoveToOwnWork;
+        if (past_state == StateName::MoveOwnY) {
+          past_state = state;
+          state = StateName::MoveToOwnWork;
+        } else if (past_state == StateName::CatchOwn) {
+          past_state = state;
+          state = StateName::MoveToShotBox;
+        }
       }
       break;
     case StateName::MoveToWaypoint:
