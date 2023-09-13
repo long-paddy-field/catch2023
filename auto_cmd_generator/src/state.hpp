@@ -6,7 +6,10 @@ namespace catch2023_principal {
 enum class StateName {
   Init,           // 初期状態(高さは自陣ギリ)
   MoveToOwnWork,  // 自陣エリアへ移動（高さは自陣ギリ）
-  CatchOwn,       // 自陣の把持（高さは自陣キャチ）
+  MoveOwnY,  // 自陣エリア内擦りながらY方向へ移動（高さは自陣キャチ)
+  CatchOwn,    // 自陣の把持（高さは自陣キャチ）
+  CatchAbove,  // 自陣の抜き出し(高さは自陣抜けられるくらい)
+  CatchOwn,    // 自陣の把持（高さは自陣キャチ）
   MoveToWaypoint,  // ウェイポイントへ移動（共通エリアの）(高さは共通ギリ)
   MoveToCmnWait,  // 共通エリア待機状態へ移動(高さは共通ギリ)
   MoveToCmnWork,  // 共通エリア上空へ移動（高さは共通ギリ）

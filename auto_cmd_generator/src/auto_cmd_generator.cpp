@@ -92,6 +92,7 @@ void AutoCmdGenerator::update() {
 
 void AutoCmdGenerator::auto_mode() {
   RCLCPP_INFO(this->get_logger(), "auto_cmd: auto_mode");
+  float past_x = auto_cmd.x;
   switch (state) {
     case StateName::Init:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: init");
@@ -127,17 +128,28 @@ void AutoCmdGenerator::auto_mode() {
         change_state_flag = false;
       }
       break;
+    case StateName::MoveOwnY:
+      handle.move_to(Area::Own, (own_area_index + 1) % 3, own_area_index,
+                     ZState::OwnCatch);
+      auto_cmd.x = past_x;
+
+      if (change_state_flag || has_arrived()) {
+        past_state = state;
+        state = StateName::CatchAbove;
+        change_state_flag = false;
+      }
+      break;
     case StateName::CatchOwn:
       RCLCPP_INFO(this->get_logger(), "auto_cmd: catch_own");
       handle.move_to(ZState::OwnCatch);
       if (has_arrived_z() || change_state_flag) {
         if (own_area_index == 1) {
-          handle.grasp(Area::Own, side == Side::Red ? 0 : 2);
+          handle.grasp(Area::Own,
+                       side == Side::Red ? 0 : 2);  // 初手自陣1つ取り
         } else {
-          handle.grasp(Area::Own, (own_area_index + 1) % 3);
+          handle.grasp(Area::Own, (own_area_index + 1) % 3);  // 普通の自陣取り
         }
-        spinsleep(2000);
-        change_state_flag = false;
+        spinsleep(1000);
         if (own_area_index == 1 || own_area_index % 3 == 1) {
           // 一個目か、保持しているワークの数が3つであれば
           own_area_index += 1;
@@ -147,8 +159,17 @@ void AutoCmdGenerator::auto_mode() {
           // 違ったら
           own_area_index += 1;
           past_state = state;
-          state = StateName::MoveToOwnWork;
+          state = StateName::MoveOwnY;
         }
+      }
+      break;
+    case StateName::CatchAbove:
+      RCLCPP_INFO(this->get_logger(), "auto_cmd: catch_above");
+      handle.move_to(ZState::OwnGiri);
+      if (has_arrived_z() || change_state_flag) {
+        change_state_flag = false;
+        past_state = state;
+        state = StateName::MoveToOwnWork;
       }
       break;
     case StateName::MoveToWaypoint:
@@ -216,7 +237,7 @@ void AutoCmdGenerator::auto_mode() {
                                             : (2 - (hold_count % 3))] ==
             false) {
           handle.grasp(Area::Cmn, hold_count % 3);
-          spinsleep(2000);
+          spinsleep(1000);
         } else {
           if (is_cmn && shift_flag != 0) {
             if (cmn_area_index != 1 && shift_flag < 0) {
