@@ -98,15 +98,23 @@ void Converter::auto_command_callback(
 
 void Converter::send_command() {
   if (is_auto) {
-    lower.send_cmd_pos(auto_movecommand.x);
-    middle.send_cmd_pos(auto_movecommand.y);
-    arm.setZPos(auto_movecommand.z);
+    if (!past_is_auto) {
+      lower.send_cmd_pos(lower.get_pos());
+      middle.send_cmd_pos(middle.get_pos());
+      arm.setZPos(arm.getZPos());
+    } else {
+      lower.send_cmd_pos(auto_movecommand.x);
+      middle.send_cmd_pos(auto_movecommand.y);
+      arm.setZPos(auto_movecommand.z);
+    }
     arm.setArmAngle(static_cast<Arm::ArmAngle>(auto_movecommand.rotate));
     arm.setHand(auto_movecommand.hand[0], auto_movecommand.hand[1],
                 auto_movecommand.hand[2]);
     manual_movecommand.hand[0] = auto_movecommand.hand[0];
     manual_movecommand.hand[1] = auto_movecommand.hand[1];
     manual_movecommand.hand[2] = auto_movecommand.hand[2];
+
+    past_is_auto = true;
   } else {
     lower.send_cmd_vel(manual_movecommand.x);
     middle.send_cmd_vel(manual_movecommand.y);
@@ -114,6 +122,7 @@ void Converter::send_command() {
     arm.setArmAngle(static_cast<Arm::ArmAngle>(manual_movecommand.rotate));
     arm.setHand(manual_movecommand.hand[0], manual_movecommand.hand[1],
                 manual_movecommand.hand[2]);
+    past_is_auto = false;
   }
 }
 void Converter::send_tf() {

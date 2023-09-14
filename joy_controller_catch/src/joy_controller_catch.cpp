@@ -55,6 +55,7 @@ void JoyControllerCatch::init_btn() {
   buttons[static_cast<int>(BUTTONS::RC)] = ButtonManager(BUTTON_TYPE::PULSER);
   buttons[static_cast<int>(BUTTONS::UC)] = ButtonManager(BUTTON_TYPE::PULSER);
   buttons[static_cast<int>(BUTTONS::DC)] = ButtonManager(BUTTON_TYPE::PULSER);
+  buttons[static_cast<int>(BUTTONS::RS)] = ButtonManager(BUTTON_TYPE::PULSER);
 }
 void JoyControllerCatch::config_params(
     const principal_interfaces::msg::Parameters::SharedPtr msg) {
@@ -105,8 +106,11 @@ void JoyControllerCatch::timer_callback() {
                                   buttons[static_cast<int>(BUTTONS::BACK)];
     state_command_.is_common = buttons[static_cast<int>(BUTTONS::UC)] -
                                buttons[static_cast<int>(BUTTONS::DC)];
-
     is_auto_.data = buttons[static_cast<int>(BUTTONS::LT)];
+    state_command_.storeflag =
+        is_auto_.data ? buttons[static_cast<int>(BUTTONS::RB)].read_onoff()
+                      : false;
+    state_command_.homing = buttons[static_cast<int>(BUTTONS::RS)];
 
     if (buttons[static_cast<int>(BUTTONS::A)]) {
     } else {

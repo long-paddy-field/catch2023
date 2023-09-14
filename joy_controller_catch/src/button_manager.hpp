@@ -37,6 +37,7 @@ class ButtonManager {
   // methods
   void set(bool btn);
   bool read();
+  bool read_onoff();
   void get_past_btn();
   operator bool() { return read(); };
   bool past_btn = false;

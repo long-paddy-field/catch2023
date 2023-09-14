@@ -42,6 +42,7 @@ bool ButtonManager::read() {
   }
 }
 
+bool ButtonManager::read_onoff() { return on_off; }
 void ButtonManager::get_past_btn() {
   RCLCPP_INFO(node->get_logger(), past_btn ? "true" : "false");
 }

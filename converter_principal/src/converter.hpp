@@ -48,6 +48,8 @@ class Converter : public rclcpp::Node {
   MOVECOMMAND manual_movecommand;
   MOVECOMMAND auto_movecommand;
   bool is_auto = false;
+  bool past_is_auto = false;
+
   rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr
       manual_command_subscription;
   rclcpp::Subscription<principal_interfaces::msg::Movecommand>::SharedPtr

@@ -14,8 +14,10 @@ enum class StateName {
   MoveToCmnWork,  // 共通エリア上空へ移動（高さは共通ギリ）
   CatchCmn,       // 共通の把持（高さは共通キャチ）
   CmnAbove,  // ワークの抜き出し(高さは共通抜けられるくらい)
+  CmnStore, // 共通のワークを自陣へリリース（高さは自陣キャチ）
   MoveToShotBox,  // シューティングボックスへ移動(高さは共通ギリ)
   MoveToRelease,  // シュートしに行く（高さは地面）
+  ShtTsukemen,       // つけ麺
   MoveToBonus,    // ボーナスエリアへ行く（高さは地面）
   Release,        // リリース（高さはワークに当たらない）
 };
@@ -30,6 +32,7 @@ enum class ZState {
   ShtGiri,
   Shoot,
   ShtAbove,
+  ShtTsuke,
 };
 
 struct LOCATION {

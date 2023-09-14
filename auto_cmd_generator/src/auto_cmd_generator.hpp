@@ -8,6 +8,7 @@
 #include "principal_interfaces/msg/parameters.hpp"
 #include "principal_interfaces/msg/statecommand.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/joy.hpp"
 #include "state.hpp"
 #include "std_msgs/msg/bool.hpp"
 
@@ -43,6 +44,10 @@ class AutoCmdGenerator : public rclcpp::Node {
   bool is_init = false;  // パラメタの読み取りが終わったかどうか
   int shift_flag = 0;
   int next_choice = 0;  // リリースしたあとどっちに行くか
+  int vertical = 0;
+  int horizontal = 0;
+  bool store_flag = false;
+  bool homing_flag = false;
 
   principal_interfaces::msg::Movecommand auto_cmd;
   principal_interfaces::msg::Movecommand::SharedPtr current_pos;
@@ -57,12 +62,13 @@ class AutoCmdGenerator : public rclcpp::Node {
   rclcpp::Subscription<principal_interfaces::msg::Parameters>::SharedPtr
       param_sub;
   rclcpp::TimerBase::SharedPtr timer_;
-
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub;
   GeneralCommand handle;
 
   void auto_mode();
   void manual_mode();
   void spinsleep(int ms);
+  void move_to_current_pos();
   void reflect_param(
       const principal_interfaces::msg::Parameters::SharedPtr msg);
   bool has_arrived();
