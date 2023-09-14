@@ -26,6 +26,8 @@ Converter::Converter()
   lower.init_odrive();
   middle.init_odrive();
   middle.set_pos(0);
+  middle.set_pos(0);
+  middle.set_pos(0);
   arm.setZMode(Arm::ZMode::vel);
   manual_command_subscription =
       this->create_subscription<principal_interfaces::msg::Movecommand>(
@@ -86,6 +88,11 @@ void Converter::auto_command_callback(
     auto_movecommand.hand[0] = msg->hand[0];
     auto_movecommand.hand[1] = msg->hand[1];
     auto_movecommand.hand[2] = msg->hand[2];
+
+    manual_movecommand.rotate = msg->rotate;
+    manual_movecommand.hand[0] = msg->hand[0];
+    manual_movecommand.hand[1] = msg->hand[1];
+    manual_movecommand.hand[2] = msg->hand[2];
   }
 }
 

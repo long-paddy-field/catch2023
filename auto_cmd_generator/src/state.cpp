@@ -46,6 +46,10 @@ void GeneralCommand::move_to(Area area, int hand, int num, ZState z_state,
               finger_offset;
       msg.z = location.stepper_state[static_cast<int>(z_state)];
       msg.rotate = 0;
+
+      if (num == 0) {
+        msg.y += finger_offset;
+      }
       break;
     case Area::Sht:
       msg.x = location.sht_area[num].first + (is_advance ? 0 : sht_offset);
