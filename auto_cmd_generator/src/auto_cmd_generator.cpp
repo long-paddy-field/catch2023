@@ -74,15 +74,29 @@ void AutoCmdGenerator::update() {
   while (rclcpp::ok()) {
     if (is_init) {
       if (is_auto) {
+        if (!past_is_auto) {
+          // 手動から自動に戻るときの復帰処理
+          if (state == StateName::MoveToOwnWork ||
+              state == StateName::CatchOwn) {
+            state == StateName::CatchOwn;
+          }else if(state==StateName::MoveToCmnWork||state==StateName::CatchCmn){
+            state=StateName::CatchCmn;
+          }else if(state==StateName::MoveToRelease||state==StateName::Release){
+            state=StateName::Release;
+          }
+        }
         auto_mode();
         // } else {
         //   manual_mode();
+        past_is_auto = true;
         RCLCPP_INFO_STREAM(
             this->get_logger(),
             "auto_cmd-> own_index: " << own_area_index
                                      << ", cmn_index: " << cmn_area_index
                                      << ", sht_index: " << sht_area_index
                                      << ", state: " << static_cast<int>(state));
+      } else {
+        past_is_auto = false;
       }
     }
     rclcpp::spin_some(this->shared_from_this());
@@ -339,6 +353,7 @@ void AutoCmdGenerator::auto_mode() {
 
 void AutoCmdGenerator::manual_mode() {
   // 現在のアームの位置がどこにあるのかを計算し、どのステートに相当するかを推測
+
   // そのステートに相当するところに移動する
 }
 
