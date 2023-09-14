@@ -254,7 +254,6 @@ void AutoCmdGenerator::auto_mode() {
             hold_count++;
             past_state = state;
             state = StateName::MoveToCmnWork;
-            past_state = state;
           } else {
             hold_count++;
             past_state = state;
