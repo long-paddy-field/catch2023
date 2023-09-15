@@ -696,6 +696,19 @@ void AutoCmdGenerator::change_state(StateName state) {
   this->state = state;
 }
 
+int ownref(int own_area_index) {
+  if (own_area_index == 0 || own_area_index == 5 || own_area_index == 8 ||
+      own_area_index == 11) {
+    return 2;
+  } else if (own_area_index == 1 || own_area_index == 4 ||
+             own_area_index == 6 || own_area_index == 9 ||
+             own_area_index == 12 || own_area_index == 14) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<AutoCmdGenerator>();
