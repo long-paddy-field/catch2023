@@ -58,10 +58,15 @@ void GeneralCommand::move_to(Area area, int hand, int num, bool is_advance) {
       msg.rotate = 0;
       break;
     case Area::Str:
-      msg.x = location.str_area[num].first+hand_offset;
+      msg.x = location.str_area[num].first + hand_offset;
       msg.y = location.str_area[num].second;
       msg.rotate = 0;
-      break;  
+      break;
+    case Area::Init:
+      msg.x = location.init_area.first;
+      msg.y = location.init_area.second;
+      msg.rotate = 0;
+      break;
     default:
       break;
   }

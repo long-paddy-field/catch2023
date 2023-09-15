@@ -56,8 +56,7 @@ void AutoCmdGenerator::reflect_param(
   if (!is_init) {
     side = msg->isred ? Side::Red : Side::Blue;
     WORKLOCATION location;
-    location.own_area.push_back(
-        std::make_pair(msg->startpos[0], msg->startpos[1]));
+    location.init_area = std::make_pair(msg->startpos[0], msg->startpos[1]);
     location.cmn_area.push_back(
         std::make_pair(msg->waypoint[0], msg->waypoint[1]));
     for (size_t i = 0; i < sizeof(msg->ownx) / sizeof(float); i++) {
@@ -121,6 +120,7 @@ void AutoCmdGenerator::update() {
 void AutoCmdGenerator::auto_mode() {
   switch (state) {
     case StateName::Init:
+      handle.move_to(Area::Init, 0, 0, ZState::OwnGiri);
       if (change_state_flag) {
         change_state_flag = false;
         change_state(StateName::MoveToWait);
@@ -130,6 +130,7 @@ void AutoCmdGenerator::auto_mode() {
       if (shift_flag != 0) {
         // 左右に移動、オーバーフローしたら反対側へ
       }
+      handle.move_to(Area::Own, 2, cmn_area_index, ZState::OwnGiri);
       if (change_area == 1) {
         change_state(StateName::MoveToOwn);
       } else if (change_area == -1) {
