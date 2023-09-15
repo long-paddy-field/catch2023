@@ -127,13 +127,67 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToWait:
-      if (shift_flag != 0) {
-        // 左右に移動、オーバーフローしたら反対側へ
+      if (shift_flag == 1) {
+        if (own_area_index == 0) {
+          own_area_index = 7;
+        } else if (own_area_index == 7) {
+          own_area_index = 10;
+        } else if (own_area_index == 10) {
+          own_area_index = 13;
+        } else if (own_area_index == 13) {
+          own_area_index = 15;
+        } else if (own_area_index == 15) {
+          own_area_index = 0;
+        }
+        shift_flag = 0;
+      } else if (shift_flag == -1) {
+        if (own_area_index == 0) {
+          own_area_index = 15;
+        } else if (own_area_index == 15) {
+          own_area_index = 13;
+        } else if (own_area_index == 13) {
+          own_area_index = 10;
+        } else if (own_area_index == 10) {
+          own_area_index = 7;
+        } else if (own_area_index == 7) {
+          own_area_index = 0;
+        }
+        shift_flag = 0;
       }
       handle.move_to(Area::Own, 2, cmn_area_index, ZState::OwnGiri);
       if (change_area == 1) {
+        if (own_area_index == 0) {
+          own_area_index = 1;
+        } else if (own_area_index == 7) {
+          if (own_progress[0]) {
+            own_area_index = 3;
+          } 
+        } else if (own_area_index == 10) {
+          if(own_progress[1]){
+            own_area_index = 5;
+          }
+        } else if (own_area_index == 13) {
+          if(own_progress[2]){
+            own_area_index = 8;
+          }
+        } else if (own_area_index == 15) {
+          if(own_progress[3]){
+            own_area_index = 11;
+          }
+        }
         change_state(StateName::MoveToOwn);
       } else if (change_area == -1) {
+        if(own_area_index == 0){
+          cmn_area_index = 0;
+        } else if (own_area_index == 7) {
+          cmn_area_index = 2;
+        } else if (own_area_index == 10) {
+          cmn_area_index = 4;
+        } else if (own_area_index == 13) {
+          cmn_area_index = 6;
+        } else if (own_area_index == 15) {
+          cmn_area_index = 8;
+        }
         change_state(StateName::MoveToCmn);
       }
       if (change_state_flag) {
