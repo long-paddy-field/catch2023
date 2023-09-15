@@ -15,6 +15,8 @@ float32[16] ownx
 float32[16] owny
 float32[9] cmnx
 float32[9] cmny
+float32[9] strx
+float32[9] stry
 float32[9] shtx
 float32[9] shty
 # field size

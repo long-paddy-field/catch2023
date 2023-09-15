@@ -48,6 +48,8 @@ void ParameterManager::load_param() {
     this->declare_parameter("red_side.own_pos_y", std::vector<double>(16, 0.0));
     this->declare_parameter("red_side.cmn_pos_x", std::vector<double>(9, 0.0));
     this->declare_parameter("red_side.cmn_pos_y", std::vector<double>(9, 0.0));
+    this->declare_parameter("red_side.str_pos_x", std::vector<double>(9, 0.0));
+    this->declare_parameter("red_side.str_pos_y", std::vector<double>(9, 0.0));
     this->declare_parameter("red_side.sht_pos_x", std::vector<double>(10, 0.0));
     this->declare_parameter("red_side.sht_pos_y", std::vector<double>(10, 0.0));
     this->declare_parameter("red_side.own_field", std::vector<double>(4, 0.0));
@@ -81,6 +83,16 @@ void ParameterManager::load_param() {
     buff = this->get_parameter("red_side.cmn_pos_y").as_double_array();
     for (int i = 0; i < 9; i++) {
       msg.cmny[i] = buff[i];
+    }
+    buff.clear();
+    buff = this->get_parameter("red_side.str_pos_x").as_double_array();
+    for (int i = 0; i < 9; i++) {
+      msg.strx[i] = buff[i];
+    }
+    buff.clear();
+    buff = this->get_parameter("red_side.str_pos_y").as_double_array();
+    for (int i = 0; i < 9; i++) {
+      msg.stry[i] = buff[i];
     }
     buff.clear();
     buff = this->get_parameter("red_side.sht_pos_x").as_double_array();
@@ -117,6 +129,8 @@ void ParameterManager::load_param() {
                             std::vector<double>(16, 0.0));
     this->declare_parameter("blue_side.cmn_pos_x", std::vector<double>(9, 0.0));
     this->declare_parameter("blue_side.cmn_pos_y", std::vector<double>(9, 0.0));
+    this->declare_parameter("blue_side.str_pos_x", std::vector<double>(9, 0.0));
+    this->declare_parameter("blue_side.str_pos_y", std::vector<double>(9, 0.0));
     this->declare_parameter("blue_side.sht_pos_x",
                             std::vector<double>(10, 0.0));
     this->declare_parameter("blue_side.sht_pos_y",
@@ -152,6 +166,16 @@ void ParameterManager::load_param() {
     buff = this->get_parameter("blue_side.cmn_pos_y").as_double_array();
     for (int i = 0; i < 9; i++) {
       msg.cmny[i] = buff[i];
+    }
+    buff.clear();
+    buff = this->get_parameter("red_side.str_pos_x").as_double_array();
+    for (int i = 0; i < 9; i++) {
+      msg.strx[i] = buff[i];
+    }
+    buff.clear();
+    buff = this->get_parameter("red_side.str_pos_y").as_double_array();
+    for (int i = 0; i < 9; i++) {
+      msg.stry[i] = buff[i];
     }
     buff.clear();
     buff = this->get_parameter("blue_side.sht_pos_x").as_double_array();
