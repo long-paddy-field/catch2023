@@ -158,21 +158,34 @@ void AutoCmdGenerator::auto_mode() {
       if (change_area == 1) {
         if (own_area_index == 0) {
           own_area_index = 1;
+          reverse_flag = false;
         } else if (own_area_index == 7) {
           if (own_progress[0]) {
             own_area_index = 3;
+            reverse_flag = false;
+          } else {
+            reverse_flag = true;
           }
         } else if (own_area_index == 10) {
           if (own_progress[1]) {
             own_area_index = 5;
+            reverse_flag = false;
+          } else {
+            reverse_flag = true;
           }
         } else if (own_area_index == 13) {
           if (own_progress[2]) {
             own_area_index = 8;
+            reverse_flag = false;
+          } else {
+            reverse_flag = true;
           }
         } else if (own_area_index == 15) {
           if (own_progress[3]) {
             own_area_index = 11;
+            reverse_flag = false;
+          } else {
+            reverse_flag = true;
           }
         }
         change_state(StateName::MoveToOwn);
@@ -198,17 +211,9 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::OwnCatch:
       handle.move_to(ZState::OwnCatch);
       if (has_arrived_z() || change_state_flag) {
-        if (own_area_index == 0 || own_area_index == 5 || own_area_index == 8 ||
-            own_area_index == 11) {
-          handle.grasp(Area::Own, 2);
-        } else if (own_area_index == 1 || own_area_index == 4 ||
-                   own_area_index == 6 || own_area_index == 9 ||
-                   own_area_index == 12 || own_area_index == 14) {
-          handle.grasp(Area::Own, 1);
-        } else {
-          handle.grasp(Area::Own, 0);
-        }
+        handle.grasp(Area::Own, ownref(own_area_index));
         hold_count++;
+
         spinsleep(300);
         if (past_state == StateName::MoveToWait || hold_count == 3) {
           change_state(
@@ -228,6 +233,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToOwn:
+
       if (shift_flag != 0) {
         // 左右に移動、オーバーフローしたら反対側へ
       } else if (change_area == 1) {
