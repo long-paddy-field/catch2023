@@ -161,23 +161,23 @@ void AutoCmdGenerator::auto_mode() {
         } else if (own_area_index == 7) {
           if (own_progress[0]) {
             own_area_index = 3;
-          } 
+          }
         } else if (own_area_index == 10) {
-          if(own_progress[1]){
+          if (own_progress[1]) {
             own_area_index = 5;
           }
         } else if (own_area_index == 13) {
-          if(own_progress[2]){
+          if (own_progress[2]) {
             own_area_index = 8;
           }
         } else if (own_area_index == 15) {
-          if(own_progress[3]){
+          if (own_progress[3]) {
             own_area_index = 11;
           }
         }
         change_state(StateName::MoveToOwn);
       } else if (change_area == -1) {
-        if(own_area_index == 0){
+        if (own_area_index == 0) {
           cmn_area_index = 0;
         } else if (own_area_index == 7) {
           cmn_area_index = 2;
@@ -196,8 +196,20 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::OwnCatch:
+      handle.move_to(ZState::OwnCatch);
       if (has_arrived_z() || change_state_flag) {
-        handle.grasp(Area::Own, own_area_index % 3);
+        if (own_area_index == 0 || own_area_index == 5 || own_area_index == 8 ||
+            own_area_index == 11) {
+          handle.grasp(Area::Own, 2);
+        } else if (own_area_index == 1 || own_area_index == 4 ||
+                   own_area_index == 6 || own_area_index == 9 ||
+                   own_area_index == 12 || own_area_index == 14) {
+          handle.grasp(Area::Own, 1);
+        } else {
+          handle.grasp(Area::Own, 0);
+        }
+        hold_count++;
+        spinsleep(300);
         if (past_state == StateName::MoveToWait || hold_count == 3) {
           change_state(
               StateName::OwnAbove);  // 一個目or3つ取ったらそのまま上がる
