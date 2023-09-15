@@ -22,6 +22,10 @@ void GeneralCommand::init(Side _side, float _arm_offset, float _cmn_offset,
 
 void GeneralCommand::move_to(Area area, int hand, int num, ZState z_state,
                              bool is_advance) {
+  move_to(area, hand, num, is_advance);
+  move_to(z_state);
+}
+void GeneralCommand::move_to(Area area, int hand, int num, bool is_advance) {
   switch (area) {
     case Area::Cmn:
       if (side == Side::Red) {
@@ -29,14 +33,12 @@ void GeneralCommand::move_to(Area area, int hand, int num, ZState z_state,
                 finger_offset;
         msg.y = location.cmn_area[num].second + (is_advance ? 0 : cmn_offset) -
                 hand_offset;
-        msg.z = location.stepper_state[static_cast<int>(z_state)];
         msg.rotate = 1;
       } else if (side == Side::Blue) {
         msg.x = location.cmn_area[num].first + arm_offset * (hand - 1) +
                 finger_offset;
         msg.y = location.cmn_area[num].second - (is_advance ? 0 : cmn_offset) +
                 hand_offset;
-        msg.z = location.stepper_state[static_cast<int>(z_state)];
         msg.rotate = -1;
       }
       break;
@@ -44,7 +46,6 @@ void GeneralCommand::move_to(Area area, int hand, int num, ZState z_state,
       msg.x = location.own_area[num].first + hand_offset;
       msg.y = location.own_area[num].second + arm_offset * (1 - hand) -
               finger_offset;
-      msg.z = location.stepper_state[static_cast<int>(z_state)];
       msg.rotate = 0;
 
       if (num == 0) {
@@ -54,14 +55,17 @@ void GeneralCommand::move_to(Area area, int hand, int num, ZState z_state,
     case Area::Sht:
       msg.x = location.sht_area[num].first + (is_advance ? 0 : sht_offset);
       msg.y = location.sht_area[num].second;
-      msg.z = location.stepper_state[static_cast<int>(z_state)];
       msg.rotate = 0;
       break;
+    case Area::Str:
+      msg.x = location.str_area[num].first+hand_offset;
+      msg.y = location.str_area[num].second;
+      msg.rotate = 0;
+      break;  
     default:
       break;
   }
 }
-
 void GeneralCommand::move_to(ZState z_state) {
   msg.z = location.stepper_state[static_cast<int>(z_state)];
 }

@@ -48,6 +48,7 @@ class AutoCmdGenerator : public rclcpp::Node {
   int horizontal = 0;
   bool store_flag = false;
   bool homing_flag = false;
+  int change_area = 0;
 
   principal_interfaces::msg::Movecommand auto_cmd;
   principal_interfaces::msg::Movecommand::SharedPtr current_pos;
@@ -76,5 +77,7 @@ class AutoCmdGenerator : public rclcpp::Node {
   bool has_arrived_z();
   bool is_auto;
   bool past_is_auto;
+  
+  void change_state(StateName next_state);
 };
 }  // namespace catch2023_principal
