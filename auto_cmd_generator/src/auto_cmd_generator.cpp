@@ -226,12 +226,16 @@ void AutoCmdGenerator::auto_mode() {
         past_state = state;
       }
       break;
-    case StateName::MoveOwnY:
+    case StateName::MoveOwnY: {
+      float past_x = auto_cmd.x;
+      int hand_index = ownref(own_area_index);
+      handle.move_to(Area::Own, hand_index, own_area_index, ZState::OwnCatch);
+      auto_cmd.x = past_x;
       if (has_arrived() || change_state_flag) {
         change_state_flag = false;
         change_state(StateName::OwnAbove);
       }
-      break;
+    } break;
     case StateName::MoveToOwn:
 
       if (shift_flag != 0) {
@@ -247,6 +251,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::OwnAbove:
+      handle.move_to(ZState::OwnGiri);
       if (has_arrived_z() || change_state_flag) {
         change_state_flag = false;
         if (past_state == StateName::MoveOwnY) {
