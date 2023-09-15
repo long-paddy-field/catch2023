@@ -51,7 +51,9 @@ class AutoCmdGenerator : public rclcpp::Node {
   bool homing_flag = false;
   int change_area = 0;
   bool reverse_flag = false;
+  int bns_count = 0;
   bool own_progress[6] = {false, false, false, false, false, false};
+  int rayer_count = 0;
   principal_interfaces::msg::Movecommand auto_cmd;
   principal_interfaces::msg::Movecommand::SharedPtr current_pos;
   rclcpp::TimerBase::SharedPtr timer;

@@ -213,7 +213,12 @@ void AutoCmdGenerator::auto_mode() {
       if (has_arrived_z() || change_state_flag) {
         handle.grasp(Area::Own, ownref(own_area_index));
         hold_count++;
-
+        own_area_index = own_area_index + (reverse_flag ? -1 : 1);
+        if (own_area_index < 0) {
+          own_area_index = 15;
+        } else if (own_area_index > 15) {
+          own_area_index = 0;
+        }
         spinsleep(300);
         if (past_state == StateName::MoveToWait || hold_count == 3) {
           change_state(
@@ -237,15 +242,26 @@ void AutoCmdGenerator::auto_mode() {
       }
     } break;
     case StateName::MoveToOwn:
-
-      if (shift_flag != 0) {
-        // 左右に移動、オーバーフローしたら反対側へ
-      } else if (change_area == 1) {
-        change_state(StateName::MoveToStr);
-      } else if (change_area == -1) {
-        change_state(StateName::MoveToWait);
+      handle.move_to(Area::Own, ownref(own_area_index), own_area_index,
+                     ZState::OwnGiri);
+      if (hold_count == 0) {
+        if (change_area == 1) {
+          change_state(StateName::MoveToStr);
+          if (own_area_index < 3) {
+            str_index = 0;
+          } else if (own_area_index < 5) {
+            str_index = 2;
+          } else if (own_area_index < 8) {
+            str_index = 4;
+          } else if (own_area_index < 11) {
+            str_index = 6;
+          } else {
+            str_index = 8;
+          }
+        } else if (change_area == -1) {
+        }
       }
-      if (change_state_flag) {
+      if (has_arrived() && (change_state_flag || hold_count > 0)) {
         change_state(StateName::OwnCatch);
         change_state_flag = false;
       }
@@ -257,13 +273,20 @@ void AutoCmdGenerator::auto_mode() {
         if (past_state == StateName::MoveOwnY) {
           change_state(StateName::MoveToOwn);
         } else {
-          // シューティングボックスへ（あとで）
+          if (reverse_flag) {
+            change_state(StateName::MoveToRail);
+          } else {
+            if (hold_count != 3 || bns_count >= 6) {
+              change_state(StateName::MoveToSht);
+            } else {
+              change_state(StateName::MoveToBns);
+            }
+          }
         }
       }
       break;
     case StateName::MoveToStr:
       if (shift_flag != 0) {
-        // 左右に移動、オーバーフローしたら反対側へ
       } else if (change_area == 1) {
         change_state(StateName::MoveToCmn);
       } else if (change_area == -1) {
@@ -354,9 +377,9 @@ void AutoCmdGenerator::auto_mode() {
 //   RCLCPP_INFO(this->get_logger(), "auto_cmd: auto_mode");
 //   float past_x = auto_cmd.x;
 //   own_area_index = own_area_index > 16 ? own_area_index - 16 :
-//   own_area_index; cmn_area_index = cmn_area_index > 9 ? cmn_area_index - 9 :
-//   cmn_area_index; sht_area_index = sht_area_index > 10 ? sht_area_index - 10
-//   : sht_area_index; switch (state) {
+//   own_area_index; cmn_area_index = cmn_area_index > 9 ? cmn_area_index - 9
+//   : cmn_area_index; sht_area_index = sht_area_index > 10 ? sht_area_index -
+//   10 : sht_area_index; switch (state) {
 //     case StateName::Init:
 //       RCLCPP_INFO(this->get_logger(), "auto_cmd: init");
 //       handle.move_to(Area::Own, 1, 0,
@@ -503,7 +526,8 @@ void AutoCmdGenerator::auto_mode() {
 //     case StateName::MoveToCmnWork:
 //       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_cmn_work");
 //       if (cmn_area_index == 9) {
-//         handle.move_to(Area::Cmn, 2, cmn_area_index, ZState::CmnAbove, true);
+//         handle.move_to(Area::Cmn, 2, cmn_area_index, ZState::CmnAbove,
+//         true);
 
 //       } else {
 //         handle.move_to(Area::Cmn, hold_count % 3, cmn_area_index,
@@ -707,6 +731,25 @@ void AutoCmdGenerator::change_state(StateName state) {
   this->state = state;
 }
 
+int progress_ref(int own_area_index) {
+  if (own_area_index == 1 || own_area_index == 2) {
+    return 0;
+  } else if (own_area_index == 0 || own_area_index == 3 ||
+             own_area_index == 4) {
+    return 1;
+  } else if (own_area_index == 5 || own_area_index == 6 ||
+             own_area_index == 7) {
+    return 2;
+  } else if (own_area_index == 8 || own_area_index == 9 ||
+             own_area_index == 10) {
+    return 3;
+  } else if (own_area_index == 11 || own_area_index == 12 ||
+             own_area_index == 13) {
+    return 4;
+  } else if (own_area_index == 14 || own_area_index == 15) {
+    return 5;
+  }
+}
 int ownref(int own_area_index) {
   if (own_area_index == 0 || own_area_index == 5 || own_area_index == 8 ||
       own_area_index == 11) {
