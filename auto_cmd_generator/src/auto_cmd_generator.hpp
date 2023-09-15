@@ -28,10 +28,11 @@ class AutoCmdGenerator : public rclcpp::Node {
   std::pair<float, float> way_point;
   std::vector<std::pair<float, float>> own_area;  // 自陣エリアの目標値
   std::vector<std::pair<float, float>> cmn_area;  // 自陣エリアの目標値
+  std::vector<std::pair<float, float>> str_area;  // 自陣エリアの目標値
   std::vector<std::pair<float, float>> sht_area;  // 自陣エリアの目標値
 
-  int own_area_index = 1;  // 自陣エリアの目標値のインデックス
-  int cmn_area_index = 1;  // 共有エリアの目標値のインデックス
+  int own_area_index = 0;  // 自陣エリアの目標値のインデックス
+  int cmn_area_index = 0;  // 共有エリアの目標値のインデックス
   int sht_area_index = 0;  // 射撃エリアの目標値のインデックス
 
   int hold_count = 0;  // ホールドしたワークの数

@@ -40,7 +40,7 @@ enum class StateName {
   // Release,        // リリース（高さはワークに当たらない）
 };
 enum class Side { Blue, Red };
-enum class Area { Own, Cmn, Sht, Str };
+enum class Area { Init, Own, Cmn, Sht, Str };
 enum class ZState {
   OwnGiri,
   OwnCatch,
@@ -60,6 +60,7 @@ struct LOCATION {
 };  // 位置
 
 struct WORKLOCATION {
+  std::pair<float, float> init_area;              // 初期位置
   std::vector<std::pair<float, float>> own_area;  // 自陣エリアのワークxy座標
   std::vector<std::pair<float, float>> cmn_area;  // 共有エリアのワークxy座標
   std::vector<std::pair<float, float>> sht_area;  // ボーナスエリアのxy座標
