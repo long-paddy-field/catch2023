@@ -89,15 +89,14 @@ void AutoCmdGenerator::update() {
     if (is_init) {
       if (is_auto) {
         if (!past_is_auto) {
-          // 手動から自動に戻るときの復帰処理
-          // if (state == StateName::MoveToOwnWork ||
-          //     state == StateName::CatchOwn) {
-          //   move_to_current_pos();
-          //   state = StateName::CatchOwn;
-          // } else if (state == StateName::MoveToCmnWork ||
-          //            state == StateName::CatchCmn) {
-          //   move_to_current_pos();
-          //   state = StateName::CatchCmn;
+          if (state == StateName::MoveToOwn || state == StateName::OwnCatch) {
+            move_to_current_pos();
+            state = StateName::OwnCatch;
+          } else if (state == StateName::MoveToCmn ||
+                     state == StateName::CmnCatch) {
+            move_to_current_pos();
+            state = StateName::CmnCatch;
+          }
           // } else if (state == StateName::MoveToBonus ||
           //            state == StateName::Release) {
           //   move_to_current_pos();
