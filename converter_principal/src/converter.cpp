@@ -98,15 +98,15 @@ void Converter::auto_command_callback(
 
 void Converter::send_command() {
   if (is_auto) {
-    if (!past_is_auto) {
-      lower.send_cmd_pos(lower.get_pos());
-      middle.send_cmd_pos(middle.get_pos());
-      arm.setZPos(arm.getZPos());
-    } else {
-      lower.send_cmd_pos(auto_movecommand.x);
-      middle.send_cmd_pos(auto_movecommand.y);
-      arm.setZPos(auto_movecommand.z);
-    }
+    // if (!past_is_auto) {
+    //   lower.send_cmd_pos(lower.get_pos());
+    //   middle.send_cmd_pos(middle.get_pos());
+    //   arm.setZPos(arm.getZPos());
+    // } else {
+    lower.send_cmd_pos(auto_movecommand.x);
+    middle.send_cmd_pos(auto_movecommand.y);
+    arm.setZPos(auto_movecommand.z);
+    // }
     arm.setArmAngle(static_cast<Arm::ArmAngle>(auto_movecommand.rotate));
     arm.setHand(auto_movecommand.hand[0], auto_movecommand.hand[1],
                 auto_movecommand.hand[2]);

@@ -7,7 +7,7 @@ launch_catch:
     sht_offset: 0.173 # ボーナスエリアとノーマルエリアの間隔
     hand_offset: 0.0463 # 回転中心と把持中心の距離
     finger_offset: 0.015 # 指の長さ
-    stepper_state: [0.060,0.002,0.090,0.030,0.100,0.0690,0.026,0.0670,0.0180]
+    stepper_state: [0.065,0.005,0.095,0.030,0.100,0.0690,0.026,0.0670,0.0180]
     # OwnGiri, OwnCatch, CmnGiri, CmnCatch, CmnAbove, ShtGiri, Shoot, ShtAbove, ShtTsuke
 
     red_side:
