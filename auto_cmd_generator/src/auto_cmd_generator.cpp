@@ -108,12 +108,12 @@ void AutoCmdGenerator::update() {
         // } else {
         //   manual_mode();
         past_is_auto = true;
-        RCLCPP_INFO_STREAM(this->get_logger(),
-                           "auto_cmd-> own_index: "
-                               << own_area_index << ", cmn_index: "
-                               << cmn_area_index << ", bns_count: " << bns_count
-                               << ", nomal_count: " << nomal_count
-                               << ", state: " << static_cast<int>(state));
+        RCLCPP_INFO_STREAM(
+            this->get_logger(),
+            "auto_cmd-> own_index: "
+                << own_area_index << ", cmn_index: " << cmn_area_index
+                << ", single_count: " << single_count << ", triple_count "
+                << triple_count << ", state: " << static_cast<int>(state));
       } else {
         move_to_current_pos();
         past_is_auto = false;
@@ -147,72 +147,52 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToWait:
-      if (shift_flag == 1) {
-        if (own_area_index == 0) {
-          own_area_index = 7;
-        } else if (own_area_index == 7) {
-          own_area_index = 10;
-        } else if (own_area_index == 10) {
-          own_area_index = 13;
-        } else if (own_area_index == 13) {
-          own_area_index = 15;
-        } else if (own_area_index == 15) {
-          own_area_index = 0;
-        }
-        shift_flag = 0;
-      } else if (shift_flag == -1) {
-        if (own_area_index == 0) {
-          own_area_index = 15;
-        } else if (own_area_index == 15) {
-          own_area_index = 13;
-        } else if (own_area_index == 13) {
-          own_area_index = 10;
-        } else if (own_area_index == 10) {
-          own_area_index = 7;
-        } else if (own_area_index == 7) {
-          own_area_index = 0;
-        }
-        shift_flag = 0;
-      }
-      handle.move_to(Area::Own, 2, own_area_index, ZState::OwnGiri);
+      handle.move_to(Area::Own, 2, 0, ZState::OwnGiri);
       auto_cmd.y += vertical;
       if (change_area == 1) {
-        change_state(StateName::MoveToOwn);
+        change_state(StateName::MoveToStr);
       } else if (change_area == -1) {
-        if (own_area_index == 0) {
-          cmn_area_index = 0;
-        } else if (own_area_index == 7) {
-          cmn_area_index = 2;
-        } else if (own_area_index == 10) {
-          cmn_area_index = 4;
-        } else if (own_area_index == 13) {
-          cmn_area_index = 6;
-        } else if (own_area_index == 15) {
-          cmn_area_index = 8;
-        }
         change_state(StateName::MoveToCmn);
       }
-      if (has_arrived_xy() && sht_area_index == 0) {
-        change_state(StateName::OwnCatch);
+      if (shift_flag == -1) {
+        reverse_flag = false;
+        change_state(StateName::MoveToOwn);
+      } else if (shift_flag == 1) {
+        reverse_flag = true;
+        own_area_index = 14;
+        change_state(StateName::MoveToRail);
       }
-      if (change_state_flag) {
+      if (has_arrived_xy() && single_count == 0) {
         change_state(StateName::OwnCatch);
-        change_state_flag = false;
       }
       break;
     case StateName::OwnCatch: {
       float past_own_index = own_area_index;
       handle.move_to(ZState::OwnCatch);
-      if (has_arrived_z() || change_state_flag) {
+      if (change_state_flag) {
         handle.grasp(Area::Own, ownref(own_area_index));
+        spinsleep(300);
         hold_count++;
+        // 掴んだあと、own_area_indexが0,1,14,15のときは問答無用でSBへ
+        own_area_index = own_area_index + (reverse_flag ? -1 : 1);
+        if (own_area_index < 0) own_area_index = 15;
+        if (own_area_index > 15) own_area_index = 0;
+        if (past_own_index == 0 || past_own_index == 1 ||
+            past_own_index == 14 || past_own_index == 15) {
+          single_flag = true;
+          change_state(StateName::MoveToSht);
+        } else if (hold_count == 3) {
+          triple_flag = true;
+          change_state(StateName::MoveToSht);
+        } else {
+          change_state(StateName::MoveOwnY);
+        }
         own_area_index = own_area_index + (reverse_flag ? -1 : 1);
         if (own_area_index < 0) {
           own_area_index = 15;
         } else if (own_area_index > 15) {
           own_area_index = 0;
         }
-        spinsleep(300);
         if (past_state == StateName::MoveToWait || hold_count == 3 ||
             (hold_count == 2 &&
              (past_own_index == 1 || past_own_index == 2 ||
