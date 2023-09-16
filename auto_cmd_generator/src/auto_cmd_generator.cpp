@@ -42,8 +42,8 @@ AutoCmdGenerator::AutoCmdGenerator()
       "parameters", 10, std::bind(&AutoCmdGenerator::reflect_param, this, _1));
   joy_sub = this->create_subscription<sensor_msgs::msg::Joy>(
       "joy", 10, [&](sensor_msgs::msg::Joy::SharedPtr joy) {
-        this->vertical = joy->axes[5];
-        this->horizontal = joy->axes[4];
+        this->vertical = joy->axes[1];
+        this->horizontal = joy->axes[0];
       });
   timer_ = this->create_wall_timer(100ms, [this]() {
     this->auto_command_publisher->publish(auto_cmd);
@@ -57,8 +57,6 @@ void AutoCmdGenerator::reflect_param(
     side = msg->isred ? Side::Red : Side::Blue;
     WORKLOCATION location;
     location.init_area = std::make_pair(msg->startpos[0], msg->startpos[1]);
-    location.cmn_area.push_back(
-        std::make_pair(msg->waypoint[0], msg->waypoint[1]));
     for (size_t i = 0; i < sizeof(msg->ownx) / sizeof(float); i++) {
       location.own_area.push_back(std::make_pair(msg->ownx[i], msg->owny[i]));
     }
@@ -275,9 +273,22 @@ void AutoCmdGenerator::auto_mode() {
             str_index = 8;
           }
         } else if (change_area == -1) {
+          change_state(StateName::MoveToWait);
+          if (own_area_index == 1) {
+            own_area_index = 0;
+          } else if (own_area_index == 3) {
+            own_area_index = 7;
+          } else if (own_area_index == 5) {
+            own_area_index = 10;
+          } else if (own_area_index == 8) {
+            own_area_index = 13;
+          } else if (own_area_index == 11) {
+            own_area_index = 15;
+          }
         }
       }
-      if (has_arrived() && (change_state_flag || hold_count > 0)) {
+      if (has_arrived() ||
+          (change_state_flag || hold_count > 0)) {  // 本番は「かつ」にする
         change_state(StateName::OwnCatch);
         change_state_flag = false;
       }
@@ -302,7 +313,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToStr:
-      handle.move_to(Area::Str, str_index % 3, str_index, ZState::OwnCatch);
+      handle.move_to(Area::Str, str_index % 3, str_index, ZState::OwnGiri);
       if (shift_flag != 0) {
         str_index += shift_flag;
         shift_flag = 0;
@@ -335,7 +346,6 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::StrStore:
       handle.move_to(ZState::OwnCatch);
       if (has_arrived_z() || change_state_flag) {
-        handle.release();
         auto_cmd.hand[str_index % 3] = !auto_cmd.hand[str_index % 3];
         if (auto_cmd.hand[str_index % 3]) {
           hold_count++;
@@ -369,10 +379,23 @@ void AutoCmdGenerator::auto_mode() {
           cmn_area_index = 0;
         }
       }
-      handle.move_to(Area::Cmn, cmn_area_index % 3, cmn_area_index, false);
+      handle.move_to(Area::Cmn, cmn_area_index % 3, cmn_area_index,
+                     ZState::CmnGiri, true);
       if (change_area == 1) {
+        if (own_area_index < 2) {
+          own_area_index = 0;
+        } else if (own_area_index < 4) {
+          own_area_index = 7;
+        } else if (own_area_index < 6) {
+          own_area_index = 10;
+        } else if (own_area_index < 8) {
+          own_area_index = 13;
+        } else {
+          own_area_index = 15;
+        }
         change_state(StateName::MoveToWait);
       } else if (change_area == -1) {
+        str_index = cmn_area_index;
         change_state(StateName::MoveToStr);
       }
       if (has_arrived() || change_state_flag) {  // 本番は「かつ」にする
@@ -392,6 +415,7 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::CmnAbove:
       handle.move_to(ZState::CmnAbove);
       if (has_arrived_z() || change_state_flag) {
+        str_index = cmn_area_index;
         change_state(StateName::MoveToStr);
       }
       break;
