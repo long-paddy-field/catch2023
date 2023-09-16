@@ -34,6 +34,7 @@ class AutoCmdGenerator : public rclcpp::Node {
   int own_area_index = 0;  // 自陣エリアの目標値のインデックス
   int cmn_area_index = 0;  // 共有エリアの目標値のインデックス
   int sht_area_index = 0;  // 射撃エリアの目標値のインデックス
+  int str_index = 0;  // ストアエリアの目標値のインデックス
 
   int hold_count = 0;  // ホールドしたワークの数
 
