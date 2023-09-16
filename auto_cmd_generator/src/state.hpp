@@ -15,9 +15,10 @@ enum class StateName {
   MoveToCmn,
   CmnCatch,
   CmnAbove,
-  MoveToRail,
   MoveToSht,
-  MoveToBns,
+  MoveToSingle,
+  MoveToTriple,
+  MoveToWall,
   Release,
 
   // Init,           // 初期状態(高さは自陣ギリ)

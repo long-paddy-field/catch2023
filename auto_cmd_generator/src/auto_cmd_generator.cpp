@@ -125,12 +125,10 @@ void AutoCmdGenerator::update() {
 }
 
 int ownref(int own_area_index) {
-  if (own_area_index == 0 || own_area_index == 5 || own_area_index == 8 ||
-      own_area_index == 11) {
+  if (own_area_index == 0 || own_area_index == 4 || own_area_index == 7 ||
+      own_area_index == 10 || own_area_index == 13 || own_area_index == 15) {
     return 2;
-  } else if (own_area_index == 1 || own_area_index == 3 ||
-             own_area_index == 6 || own_area_index == 9 ||
-             own_area_index == 12 || own_area_index == 14) {
+  } else if (own_area_index % 3 == 0) {
     return 1;
   } else {
     return 0;
@@ -150,17 +148,9 @@ void AutoCmdGenerator::auto_mode() {
       handle.move_to(Area::Own, 2, 0, ZState::OwnGiri);
       auto_cmd.y += vertical;
       if (change_area == 1) {
-        change_state(StateName::MoveToStr);
+        change_state(StateName::MoveToOwn);
       } else if (change_area == -1) {
         change_state(StateName::MoveToCmn);
-      }
-      if (shift_flag == -1) {
-        reverse_flag = false;
-        change_state(StateName::MoveToOwn);
-      } else if (shift_flag == 1) {
-        reverse_flag = true;
-        own_area_index = 14;
-        change_state(StateName::MoveToRail);
       }
       if (has_arrived_xy() && single_count == 0) {
         change_state(StateName::OwnCatch);
@@ -174,7 +164,8 @@ void AutoCmdGenerator::auto_mode() {
         spinsleep(300);
         hold_count++;
         // 掴んだあと、own_area_indexが0,1,14,15のときは問答無用でSBへ
-        own_area_index = own_area_index + (reverse_flag ? -1 : 1);
+        own_area_index++;
+
         if (own_area_index < 0) own_area_index = 15;
         if (own_area_index > 15) own_area_index = 0;
         if (past_own_index == 0 || past_own_index == 1 ||
@@ -187,50 +178,15 @@ void AutoCmdGenerator::auto_mode() {
         } else {
           change_state(StateName::MoveOwnY);
         }
-        own_area_index = own_area_index + (reverse_flag ? -1 : 1);
-        if (own_area_index < 0) {
-          own_area_index = 15;
-        } else if (own_area_index > 15) {
-          own_area_index = 0;
-        }
-        if (past_state == StateName::MoveToWait || hold_count == 3 ||
-            (hold_count == 2 &&
-             (past_own_index == 1 || past_own_index == 2 ||
-              past_own_index == 3 || past_own_index == 4 ||
-              past_own_index == 14 || past_own_index == 15))) {
-          change_state(
-              StateName::OwnAbove);  // 一個目or3つ取ったらそのまま上がる
-          if (past_own_index == 1 || past_own_index == 2) {
-            own_progress[0] = true;
-          } else if (past_own_index == 3 || past_own_index == 4) {
-            own_progress[1] = true;
-          } else if (past_own_index == 14 || past_own_index == 15) {
-            own_progress[5] = true;
-          } else if (hold_count == 3) {
-            if (past_own_index == 5 || past_own_index == 7) {
-              own_progress[2] = true;
-            } else if (past_own_index == 8 || past_own_index == 10) {
-              own_progress[3] = true;
-            } else if (past_own_index == 11 || past_own_index == 13) {
-              own_progress[4] = true;
-            }
-          }
-        } else {
-          // 擦りながら移動（あとで）
-          change_state(StateName::MoveOwnY);  // それ以外は擦り移動
-        }
-        change_state_flag = false;
-        past_state = state;
       }
       break;
     }
     case StateName::MoveOwnY: {
       float past_x = auto_cmd.x;
-      int hand_index = ownref(own_area_index);
-      handle.move_to(Area::Own, hand_index, own_area_index, ZState::OwnCatch);
+      handle.move_to(Area::Own, ownref(own_area_index), own_area_index,
+                     ZState::OwnCatch);
       auto_cmd.x = past_x;
       if (has_arrived_xy() || change_state_flag) {
-        change_state_flag = false;
         change_state(StateName::OwnAbove);
       }
     } break;
@@ -238,60 +194,25 @@ void AutoCmdGenerator::auto_mode() {
       handle.move_to(Area::Own, ownref(own_area_index), own_area_index,
                      ZState::OwnGiri);
       auto_cmd.y += vertical;
-      if (hold_count == 0) {
-        if (change_area == 1) {
-          change_state(StateName::MoveToStr);
-          if (own_area_index < 3) {
-            str_index = 0;
-          } else if (own_area_index < 5) {
-            str_index = 2;
-          } else if (own_area_index < 8) {
-            str_index = 4;
-          } else if (own_area_index < 11) {
-            str_index = 6;
-          } else {
-            str_index = 8;
-          }
-        } else if (change_area == -1) {
-          change_state(StateName::MoveToWait);
-          if (own_area_index == 1) {
-            own_area_index = 0;
-          } else if (own_area_index == 3) {
-            own_area_index = 7;
-          } else if (own_area_index == 5) {
-            own_area_index = 10;
-          } else if (own_area_index == 8) {
-            own_area_index = 13;
-          } else if (own_area_index == 11) {
-            own_area_index = 15;
-          }
-        }
+      if (change_area == 1) {
+        change_state(StateName::MoveToStr);
+      } else if (change_area == -1) {
+        change_state(StateName::MoveToWait);
       }
       if (has_arrived_xy() &&
           (change_state_flag || hold_count > 0)) {  // 本番は「かつ」にする
         change_state(StateName::OwnCatch);
-        change_state_flag = false;
       }
       break;
     case StateName::OwnAbove:
       handle.move_to(ZState::OwnGiri);
-      if (has_arrived_z() || change_state_flag) {
-        change_state_flag = false;
+      if (change_state_flag) {
         if (past_state == StateName::MoveOwnY) {
           change_state(StateName::MoveToOwn);
         } else if (past_state == StateName::StrStore) {
           change_state(StateName::MoveToCmn);
         } else {
-          if (reverse_flag) {
-            change_state(StateName::MoveToRail);
-          } else {
-            change_state(StateName::MoveToSht);
-            // if (hold_count != 3 || bns_count >= 6 || bns_count % 2 == 1) {
-            //   change_state(StateName::MoveToSht);
-            // } else {
-            //   change_state(StateName::MoveToBns);
-            // }
-          }
+          change_state(StateName::MoveToSht);
         }
       }
       break;
@@ -367,23 +288,12 @@ void AutoCmdGenerator::auto_mode() {
                      ZState::CmnGiri, true);
       auto_cmd.x += horizontal;
       if (change_area == 1) {
-        if (own_area_index < 2) {
-          own_area_index = 0;
-        } else if (own_area_index < 4) {
-          own_area_index = 7;
-        } else if (own_area_index < 6) {
-          own_area_index = 10;
-        } else if (own_area_index < 8) {
-          own_area_index = 13;
-        } else {
-          own_area_index = 15;
-        }
         change_state(StateName::MoveToWait);
       } else if (change_area == -1) {
         str_index = cmn_area_index;
         change_state(StateName::MoveToStr);
       }
-      if (has_arrived_xy() && change_state_flag) {  // 本番は「かつ」にする
+      if (has_arrived_xy() || change_state_flag) {  // 本番は「かつ」にする
         change_state(StateName::CmnCatch);
         change_state_flag = false;
       }
@@ -404,127 +314,56 @@ void AutoCmdGenerator::auto_mode() {
         change_state(StateName::MoveToStr);
       }
       break;
-    case StateName::MoveToRail:
-      handle.move_to(Area::Own, 1, own_area_index);
-      auto_cmd.y = 0.150;
-      if (has_arrived_xy() || change_state_flag) {
-        change_state(StateName::MoveToSht);
-        // if (hold_count != 3 || bns_count >= 6 || bns_count % 2 == 1) {
-        //   change_state(StateName::MoveToSht);
-        // } else {
-        //   change_state(StateName::MoveToBns);
-        // }
-      }
-      break;
-      //     case StateName::MoveToShotBox:
-      //       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_shoot");
-      //       handle.move_to(Area::Sht, 1, 0, ZState::ShtGiri, true);
-      //       if (change_state_flag || has_arrived()) {
-      //         past_state = state;
-      //         state = StateName::MoveToRelease;
-      //         change_state_flag = false;
-      //       }
-      //       break;
-      //     case StateName::MoveToRelease:
-      //       RCLCPP_INFO(this->get_logger(), "auto_cmn: move_to_release");
-      //       handle.move_to(Area::Sht, 1, sht_area_index, ZState::ShtGiri,
-      //       false); if (change_state_flag || has_arrived()) {
-      //         change_state_flag = false;
-      //         if (sht_area_index == 1 || sht_area_index > 7) {
-      //           past_state = state;
-      //           state = StateName::Release;
-      //         } else {
-      //           past_state = state;
-      //           state = StateName::ShtTsukemen;
-      //         }
-      //       }
-      //       break;
-      //     case StateName::ShtTsukemen:
-      //       RCLCPP_INFO(this->get_logger(), "auto_cmn: Shoot_Tsukemen");
-      //       handle.move_to(ZState::ShtTsuke);
-      //       if (change_state_flag || has_arrived_z()) {
-      //         change_state_flag = false;
-      //         past_state = state;
-      //         state = StateName::MoveToBonus;
-      //       }
-      //       break;
-      //     case StateName::MoveToBonus:
-      //       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_bonus");
-      //       handle.move_to(Area::Sht, 1, sht_area_index, ZState::Shoot,
-      //       true); if (change_state_flag || has_arrived()) {
-      //         change_state_flag = false;
-      //         past_state = state;
-      //         state = StateName::Release;
-      //       }
-      //       break;
-      //     case StateName::Release:
-      //       RCLCPP_INFO(this->get_logger(), "auto_cmd: release");
-      //       if (auto_cmd.hand[0] || auto_cmd.hand[1] || auto_cmd.hand[2]) {
-      //         handle.release();
-      //         sht_area_index++;
-      //         hold_count = 0;
-      //       } else {
-      //         handle.move_to(ZState::ShtAbove);
-      //         if (has_arrived_z() || change_state_flag) {
-      //           change_state_flag = false;
-      //           if (next_choice == 1) {
-      //             past_state = state;
-      //             state = StateName::MoveToWaypoint;
-      //             is_cmn = false;
-      //           } else if (next_choice == -1) {
-      //             past_state = state;
-      //             state = StateName::MoveToOwnWork;
-      //           }
-      //         }
-      //       }
-      //       break;
-
     case StateName::MoveToSht:
-      if (hold_count == 3 && bns_count % 2 == 1) {
-        handle.move_to(Area::Sht, 1, bns_count, ZState::ShtGiri, false);
-      } else {
-        handle.move_to(Area::Sht, 1, (6 - nomal_count), ZState::ShtGiri, false);
-      }
-      if (past_state == StateName::StrStore && current_pos->x > 0.05 &&
-          current_pos->y > 0.7) {
-        auto_cmd.x = 0.05;
-        auto_cmd.y = current_pos->y;
-      }
-      // 現在位置を取得してZを下げる
-      if (current_pos->x < 0.1 && current_pos->y < 0.0) {
-        handle.move_to(ZState::Shoot);
-      }
-      if (has_arrived_xy() || change_state_flag) {
-        if (hold_count != 3 || bns_count >= 6) {
-          nomal_count++;
-          change_state(StateName::Release);
-        } else {
-          change_state(StateName::MoveToBns);
+      handle.move_to(Area::Sht, 1, 0, ZState::ShtGiri, false);
+      if (has_arrived_xy()) {
+        handle.move_to(ZState::ShtTsuke);
+        if (change_state_flag && single_flag && single_count < 6) {
+          single_flag = false;
+          change_state(StateName::MoveToSingle);
+        } else if (change_state_flag && triple_flag && triple_count < 4) {
+          triple_flag = false;
+          change_state(StateName::MoveToWall);
         }
-
-        // ボーナスが全部埋まってたらBnsには行かないでリリースへ
       }
       break;
-    case StateName::MoveToBns:
-      handle.move_to(Area::Sht, 1, bns_count, ZState::ShtGiri, true);
-      if (past_state == StateName::StrStore && current_pos->x > 0.05 &&
-          current_pos->y > 0.295) {
-        auto_cmd.x = 0;
-        auto_cmd.y = current_pos->y;
+    case StateName::MoveToSingle:
+      if (single_count == 0) {
+        handle.move_to(Area::Sht, 1, 4, ZState::Shoot, true);
+      } else if (single_count == 1) {
+        handle.move_to(Area::Sht, 1, 3, ZState::Shoot, true);
+      } else {
+        handle.move_to(Area::Sht, 1, 0, ZState::Shoot, true);
+        auto_cmd.x = 0.024 * single_count - 0.148;
       }
-      if (past_state == StateName::StrStore && current_pos->x <= 0.05 &&
-          current_pos->y > 0.295) {
-        auto_cmd.x = 0;
-      }
-
-      if (current_pos->x < 0.6 &&
-          current_pos->y < 0.11 * bns_count - 0.575) {  // 後で下げる位置を確定
-        handle.move_to(ZState::Shoot);
-      }
-      if (has_arrived_xy() || change_state_flag) {
-        change_state_flag = false;
+      if (change_state_flag) {
         change_state(StateName::Release);
-        bns_count++;
+        single_count++;
+      }
+      break;
+    case StateName::MoveToWall:
+      if (triple_count < 2) {
+        handle.move_to(Area::Sht, 1, 1, ZState::Shoot, false);
+      } else if (triple_count < 4) {
+        handle.move_to(Area::Sht, 1, 6, ZState::Shoot, false);
+      }
+      if (has_arrived_xy()) {
+        change_state(StateName::MoveToTriple);
+      }
+      break;
+    case StateName::MoveToTriple:
+      if (triple_count == 0) {
+        handle.move_to(Area::Sht, 1, 2, ZState::Shoot, true);
+      } else if (triple_count == 1) {
+        handle.move_to(Area::Sht, 1, 1, ZState::Shoot, true);
+      } else if (triple_count == 2) {
+        handle.move_to(Area::Sht, 1, 5, ZState::Shoot, true);
+      } else if (triple_count == 3) {
+        handle.move_to(Area::Sht, 1, 6, ZState::Shoot, true);
+      }
+      if (change_state_flag) {
+        change_state(StateName::Release);
+        triple_count++;
       }
       break;
     case StateName::Release:
@@ -533,8 +372,6 @@ void AutoCmdGenerator::auto_mode() {
 
       handle.move_to(ZState::ShtAbove);
       if (has_arrived_z() || change_state_flag) {
-        sht_area_index++;
-        change_state_flag = false;
         change_state(StateName::MoveToWait);
         own_area_index = 0;
       }
