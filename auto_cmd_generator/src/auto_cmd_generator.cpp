@@ -68,6 +68,9 @@ void AutoCmdGenerator::reflect_param(
     for (size_t i = 0; i < sizeof(msg->shtx) / sizeof(float); i++) {
       location.sht_area.push_back(std::make_pair(msg->shtx[i], msg->shty[i]));
     }
+    for (size_t i = 0; i < sizeof(msg->strx) / sizeof(float); i++) {
+      location.str_area.push_back(std::make_pair(msg->strx[i], msg->stry[i]));
+    }
     for (size_t i = 0; i < sizeof(msg->stepperstate) / sizeof(float); i++) {
       location.stepper_state.push_back(msg->stepperstate[i]);
     }
@@ -167,7 +170,7 @@ void AutoCmdGenerator::auto_mode() {
         }
         shift_flag = 0;
       }
-      handle.move_to(Area::Own, 2, cmn_area_index, ZState::OwnGiri);
+      handle.move_to(Area::Own, 2, own_area_index, ZState::OwnGiri);
       if (change_area == 1) {
         if (own_area_index == 0) {
           own_area_index = 1;
@@ -373,7 +376,7 @@ void AutoCmdGenerator::auto_mode() {
           cmn_area_index = 0;
         }
       }
-      handle.move_to(Area::Cmn, cmn_area_index % 3, cmn_area_index, true);
+      handle.move_to(Area::Cmn, cmn_area_index % 3, cmn_area_index, false);
       if (change_area == 1) {
         change_state(StateName::MoveToWait);
       } else if (change_area == -1) {
@@ -445,7 +448,9 @@ void AutoCmdGenerator::auto_mode() {
       if (has_arrived_z() || change_state_flag) {
         change_state_flag = false;
         change_state(StateName::MoveToWait);
+        own_area_index = 0;
       }
+
       break;
   }
 }
@@ -824,7 +829,7 @@ int progress_ref(int own_area_index) {
   } else if (own_area_index == 11 || own_area_index == 12 ||
              own_area_index == 13) {
     return 4;
-  } else if (own_area_index == 14 || own_area_index == 15) {
+  } else {
     return 5;
   }
 }
