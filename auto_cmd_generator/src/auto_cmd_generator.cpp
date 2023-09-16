@@ -314,6 +314,11 @@ void AutoCmdGenerator::auto_mode() {
       if (shift_flag != 0) {
         // 左右に移動、オーバーフローしたら反対側へ
         cmn_area_index += shift_flag;
+        if (cmn_area_index < 0) {
+          cmn_area_index = 8;
+        } else if (cmn_area_index > 8) {
+          cmn_area_index = 0;
+        }
         shift_flag = 0;
         if (cmn_area_index < 0) {
           cmn_area_index = 8;
