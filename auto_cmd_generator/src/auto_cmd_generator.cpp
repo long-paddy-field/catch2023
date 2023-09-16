@@ -117,6 +117,19 @@ void AutoCmdGenerator::update() {
   }
 }
 
+int ownref(int own_area_index) {
+  if (own_area_index == 0 || own_area_index == 5 || own_area_index == 8 ||
+      own_area_index == 11) {
+    return 2;
+  } else if (own_area_index == 1 || own_area_index == 4 ||
+             own_area_index == 6 || own_area_index == 9 ||
+             own_area_index == 12 || own_area_index == 14) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 void AutoCmdGenerator::auto_mode() {
   switch (state) {
     case StateName::Init:
@@ -286,10 +299,37 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToStr:
+      handle.move_to(Area::Str, str_index % 3, str_index, ZState::OwnCatch);
       if (shift_flag != 0) {
+        if (shift_flag == -1) {
+          if (str_index == 0) {
+            str_index = 8;
+          } else {
+            str_index--;
+          }
+        } else if (shift_flag == 1) {
+          if (str_index == 8) {
+            str_index = 0;
+          } else {
+            str_index++;
+          }
+        }
+        shift_flag = 0;
       } else if (change_area == 1) {
+        cmn_area_index = str_index;
         change_state(StateName::MoveToCmn);
       } else if (change_area == -1) {
+        if (str_index < 2) {
+          own_area_index = 1;
+        } else if (str_index < 4) {
+          own_area_index = 3;
+        } else if (str_index < 6) {
+          own_area_index = 5;
+        } else if (str_index < 8) {
+          own_area_index = 8;
+        } else {
+          own_area_index = 11;
+        }
         change_state(StateName::MoveToOwn);
       }
       if (change_state_flag) {
@@ -297,15 +337,22 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::StrStore:
+      handle.move_to(ZState::OwnCatch);
       if (has_arrived_z() || change_state_flag) {
         handle.release();
-        auto_cmd.hand[index] = !auto_cmd.hand[index];
+        auto_cmd.hand[str_index % 3] = !auto_cmd.hand[str_index % 3];
+        if (auto_cmd.hand[str_index % 3]) {
+          hold_count++;
+        } else {
+          hold_count--;
+        }
         change_state_flag = false;
         if (hold_count == 3) {
-          // シューティングボックスへ
-        } else if (auto_cmd.hand[index]) {
+          change_state(StateName::MoveToSht);
+        } else if (auto_cmd.hand[str_index % 3]) {
           change_state(StateName::MoveToStr);
         } else {
+          cmn_area_index = str_index;
           change_state(StateName::MoveToCmn);
         }
       }
@@ -779,18 +826,6 @@ int progress_ref(int own_area_index) {
     return 4;
   } else if (own_area_index == 14 || own_area_index == 15) {
     return 5;
-  }
-}
-int ownref(int own_area_index) {
-  if (own_area_index == 0 || own_area_index == 5 || own_area_index == 8 ||
-      own_area_index == 11) {
-    return 2;
-  } else if (own_area_index == 1 || own_area_index == 4 ||
-             own_area_index == 6 || own_area_index == 9 ||
-             own_area_index == 12 || own_area_index == 14) {
-    return 1;
-  } else {
-    return 0;
   }
 }
 
