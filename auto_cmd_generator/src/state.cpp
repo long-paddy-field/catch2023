@@ -48,9 +48,9 @@ void GeneralCommand::move_to(Area area, int hand, int num, bool is_advance) {
               finger_offset;
       msg.rotate = 0;
 
-      if (num == 0) {
-        msg.y += finger_offset;
-      }
+      // if (num == 0) {
+      //   msg.y += finger_offset;
+      // }
       break;
     case Area::Sht:
       msg.x = location.sht_area[num].first + (is_advance ? 0 : sht_offset);
@@ -63,7 +63,7 @@ void GeneralCommand::move_to(Area area, int hand, int num, bool is_advance) {
       msg.rotate = 0;
       break;
     case Area::Init:
-      msg.x = location.init_area.first;
+      msg.x = location.init_area.first+hand_offset;
       msg.y = location.init_area.second;
       msg.rotate = 0;
       break;

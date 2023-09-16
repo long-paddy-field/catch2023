@@ -42,8 +42,14 @@ AutoCmdGenerator::AutoCmdGenerator()
       "parameters", 10, std::bind(&AutoCmdGenerator::reflect_param, this, _1));
   joy_sub = this->create_subscription<sensor_msgs::msg::Joy>(
       "joy", 10, [&](sensor_msgs::msg::Joy::SharedPtr joy) {
-        this->vertical = joy->axes[1];
-        this->horizontal = joy->axes[0];
+        this->vertical =
+            fabs(joy->axes[1]) > 0.2
+                ? (side == Side::Red ? 1 : -1) * joy->axes[1] * 0.01
+                : 0;
+        this->horizontal =
+            fabs(joy->axes[0]) > 0.2
+                ? (side == Side::Red ? -1 : 1) * joy->axes[0] * 0.01
+                : 0;
       });
   timer_ = this->create_wall_timer(100ms, [this]() {
     this->auto_command_publisher->publish(auto_cmd);
@@ -169,6 +175,7 @@ void AutoCmdGenerator::auto_mode() {
         shift_flag = 0;
       }
       handle.move_to(Area::Own, 2, own_area_index, ZState::OwnGiri);
+      auto_cmd.y += vertical;
       if (change_area == 1) {
         if (own_area_index == 0) {
           own_area_index = 1;
@@ -217,6 +224,9 @@ void AutoCmdGenerator::auto_mode() {
         }
         change_state(StateName::MoveToCmn);
       }
+      if (has_arrived() && sht_area_index == 0) {
+        change_state(StateName::OwnCatch);
+      }
       if (change_state_flag) {
         change_state(StateName::OwnCatch);
         change_state_flag = false;
@@ -258,6 +268,7 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::MoveToOwn:
       handle.move_to(Area::Own, ownref(own_area_index), own_area_index,
                      ZState::OwnGiri);
+      auto_cmd.y += vertical;
       if (hold_count == 0) {
         if (change_area == 1) {
           change_state(StateName::MoveToStr);
@@ -287,7 +298,7 @@ void AutoCmdGenerator::auto_mode() {
           }
         }
       }
-      if (has_arrived() ||
+      if (has_arrived() &&
           (change_state_flag || hold_count > 0)) {  // 本番は「かつ」にする
         change_state(StateName::OwnCatch);
         change_state_flag = false;
@@ -299,6 +310,8 @@ void AutoCmdGenerator::auto_mode() {
         change_state_flag = false;
         if (past_state == StateName::MoveOwnY) {
           change_state(StateName::MoveToOwn);
+        } else if (past_state == StateName::StrStore) {
+          change_state(StateName::MoveToCmn);
         } else {
           if (reverse_flag) {
             change_state(StateName::MoveToRail);
@@ -314,6 +327,7 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::MoveToStr:
       handle.move_to(Area::Str, str_index % 3, str_index, ZState::OwnGiri);
+      auto_cmd.y += vertical;
       if (shift_flag != 0) {
         str_index += shift_flag;
         shift_flag = 0;
@@ -359,7 +373,7 @@ void AutoCmdGenerator::auto_mode() {
           change_state(StateName::MoveToStr);
         } else {
           cmn_area_index = str_index;
-          change_state(StateName::MoveToCmn);
+          change_state(StateName::OwnAbove);
         }
       }
       break;
@@ -381,6 +395,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       handle.move_to(Area::Cmn, cmn_area_index % 3, cmn_area_index,
                      ZState::CmnGiri, true);
+      auto_cmd.x += horizontal;
       if (change_area == 1) {
         if (own_area_index < 2) {
           own_area_index = 0;
@@ -432,6 +447,11 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::MoveToSht:
       handle.move_to(Area::Sht, 1, bns_count, ZState::ShtGiri, false);
+      if (past_state == StateName::StrStore && current_pos->x > 0.1 &&
+          current_pos->y > 0.7) {
+        auto_cmd.x = 0;
+        auto_cmd.y = current_pos->y;
+      }
       // 現在位置を取得してZを下げる
       if (current_pos->x < -0.5 && current_pos->y < 0.0) {
         handle.move_to(ZState::Shoot);
@@ -448,8 +468,18 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::MoveToBns:
       handle.move_to(Area::Sht, 1, bns_count, ZState::ShtGiri, true);
+      if (past_state == StateName::StrStore && current_pos->x > 0.05 &&
+          current_pos->y > 0.295) {
+        auto_cmd.x = 0;
+        auto_cmd.y = current_pos->y;
+      }
+      if (past_state == StateName::StrStore && current_pos->x <= 0.05 &&
+          current_pos->y > 0.295) {
+        auto_cmd.x = 0;
+      }
+
       if (current_pos->x < 0.3 &&
-          current_pos->y < bns_count * 1) {  // 後で下げる位置を確定
+          current_pos->y < bns_count * 0.1) {  // 後で下げる位置を確定
         handle.move_to(ZState::Shoot);
       }
       if (has_arrived() || change_state_flag) {
@@ -461,6 +491,7 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::Release:
       handle.release();
       hold_count = 0;
+      sht_area_index++;
       handle.move_to(ZState::ShtAbove);
       if (has_arrived_z() || change_state_flag) {
         change_state_flag = false;
@@ -798,8 +829,8 @@ void AutoCmdGenerator::spinsleep(int ms) {
 }
 
 bool AutoCmdGenerator::has_arrived() {
-  // return has_arrived_xy() && has_arrived_z();
-  return false;
+  return has_arrived_xy() && has_arrived_z();
+  // return false;
 }
 
 bool AutoCmdGenerator::has_arrived_xy() {
@@ -812,8 +843,8 @@ bool AutoCmdGenerator::has_arrived_xy() {
 bool AutoCmdGenerator::has_arrived_z() {
   float error =
       sqrt((auto_cmd.z - current_pos->z) * (auto_cmd.z - current_pos->z));
-  // return error < 0.005;
-  return false;
+  return error < 0.005;
+  // return false;
 }
 
 void AutoCmdGenerator::move_to_current_pos() {

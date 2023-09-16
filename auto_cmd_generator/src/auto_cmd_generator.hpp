@@ -46,8 +46,8 @@ class AutoCmdGenerator : public rclcpp::Node {
   bool is_init = false;  // パラメタの読み取りが終わったかどうか
   int shift_flag = 0;
   int next_choice = 0;  // リリースしたあとどっちに行くか
-  int vertical = 0;
-  int horizontal = 0;
+  float vertical = 0;
+  float horizontal = 0;
   bool store_flag = false;
   bool homing_flag = false;
   int change_area = 0;
