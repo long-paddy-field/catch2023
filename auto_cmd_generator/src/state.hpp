@@ -19,7 +19,6 @@ enum class StateName {
   MoveToSht,
   MoveToBns,
   Release,
-  ShtAbove,
 
   // Init,           // 初期状態(高さは自陣ギリ)
   // MoveToWait,     // 待機状態(高さは自陣ギリ）
