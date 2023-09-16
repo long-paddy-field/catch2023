@@ -108,12 +108,12 @@ void AutoCmdGenerator::update() {
         // } else {
         //   manual_mode();
         past_is_auto = true;
-        RCLCPP_INFO_STREAM(
-            this->get_logger(),
-            "auto_cmd-> own_index: " << own_area_index
-                                     << ", cmn_index: " << cmn_area_index
-                                     << ", sht_index: " << sht_area_index
-                                     << ", state: " << static_cast<int>(state));
+        RCLCPP_INFO_STREAM(this->get_logger(),
+                           "auto_cmd-> own_index: "
+                               << own_area_index << ", cmn_index: "
+                               << cmn_area_index << ", bns_count: " << bns_count
+                               << ", nomal_count: " << nomal_count
+                               << ", state: " << static_cast<int>(state));
       } else {
         move_to_current_pos();
         past_is_auto = false;
@@ -177,38 +177,6 @@ void AutoCmdGenerator::auto_mode() {
       handle.move_to(Area::Own, 2, own_area_index, ZState::OwnGiri);
       auto_cmd.y += vertical;
       if (change_area == 1) {
-        if (own_area_index == 0) {
-          own_area_index = 1;
-          reverse_flag = false;
-        } else if (own_area_index == 7) {
-          if (own_progress[0]) {
-            own_area_index = 3;
-            reverse_flag = false;
-          } else {
-            reverse_flag = true;
-          }
-        } else if (own_area_index == 10) {
-          if (own_progress[1]) {
-            own_area_index = 5;
-            reverse_flag = false;
-          } else {
-            reverse_flag = true;
-          }
-        } else if (own_area_index == 13) {
-          if (own_progress[2]) {
-            own_area_index = 8;
-            reverse_flag = false;
-          } else {
-            reverse_flag = true;
-          }
-        } else if (own_area_index == 15) {
-          if (own_progress[3] && !own_progress[4]) {
-            own_area_index = 11;
-            reverse_flag = false;
-          } else {
-            reverse_flag = true;
-          }
-        }
         change_state(StateName::MoveToOwn);
       } else if (change_area == -1) {
         if (own_area_index == 0) {
@@ -337,11 +305,12 @@ void AutoCmdGenerator::auto_mode() {
           if (reverse_flag) {
             change_state(StateName::MoveToRail);
           } else {
-            if (hold_count != 3 || bns_count >= 6) {
-              change_state(StateName::MoveToSht);
-            } else {
-              change_state(StateName::MoveToBns);
-            }
+            change_state(StateName::MoveToSht);
+            // if (hold_count != 3 || bns_count >= 6 || bns_count % 2 == 1) {
+            //   change_state(StateName::MoveToSht);
+            // } else {
+            //   change_state(StateName::MoveToBns);
+            // }
           }
         }
       }
@@ -459,26 +428,95 @@ void AutoCmdGenerator::auto_mode() {
       handle.move_to(Area::Own, 1, own_area_index);
       auto_cmd.y = 0.150;
       if (has_arrived_xy() || change_state_flag) {
-        if (hold_count != 3 || bns_count >= 6) {
-          change_state(StateName::MoveToSht);
-        } else {
-          change_state(StateName::MoveToBns);
-        }
+        change_state(StateName::MoveToSht);
+        // if (hold_count != 3 || bns_count >= 6 || bns_count % 2 == 1) {
+        //   change_state(StateName::MoveToSht);
+        // } else {
+        //   change_state(StateName::MoveToBns);
+        // }
       }
       break;
+      //     case StateName::MoveToShotBox:
+      //       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_shoot");
+      //       handle.move_to(Area::Sht, 1, 0, ZState::ShtGiri, true);
+      //       if (change_state_flag || has_arrived()) {
+      //         past_state = state;
+      //         state = StateName::MoveToRelease;
+      //         change_state_flag = false;
+      //       }
+      //       break;
+      //     case StateName::MoveToRelease:
+      //       RCLCPP_INFO(this->get_logger(), "auto_cmn: move_to_release");
+      //       handle.move_to(Area::Sht, 1, sht_area_index, ZState::ShtGiri,
+      //       false); if (change_state_flag || has_arrived()) {
+      //         change_state_flag = false;
+      //         if (sht_area_index == 1 || sht_area_index > 7) {
+      //           past_state = state;
+      //           state = StateName::Release;
+      //         } else {
+      //           past_state = state;
+      //           state = StateName::ShtTsukemen;
+      //         }
+      //       }
+      //       break;
+      //     case StateName::ShtTsukemen:
+      //       RCLCPP_INFO(this->get_logger(), "auto_cmn: Shoot_Tsukemen");
+      //       handle.move_to(ZState::ShtTsuke);
+      //       if (change_state_flag || has_arrived_z()) {
+      //         change_state_flag = false;
+      //         past_state = state;
+      //         state = StateName::MoveToBonus;
+      //       }
+      //       break;
+      //     case StateName::MoveToBonus:
+      //       RCLCPP_INFO(this->get_logger(), "auto_cmd: move_to_bonus");
+      //       handle.move_to(Area::Sht, 1, sht_area_index, ZState::Shoot,
+      //       true); if (change_state_flag || has_arrived()) {
+      //         change_state_flag = false;
+      //         past_state = state;
+      //         state = StateName::Release;
+      //       }
+      //       break;
+      //     case StateName::Release:
+      //       RCLCPP_INFO(this->get_logger(), "auto_cmd: release");
+      //       if (auto_cmd.hand[0] || auto_cmd.hand[1] || auto_cmd.hand[2]) {
+      //         handle.release();
+      //         sht_area_index++;
+      //         hold_count = 0;
+      //       } else {
+      //         handle.move_to(ZState::ShtAbove);
+      //         if (has_arrived_z() || change_state_flag) {
+      //           change_state_flag = false;
+      //           if (next_choice == 1) {
+      //             past_state = state;
+      //             state = StateName::MoveToWaypoint;
+      //             is_cmn = false;
+      //           } else if (next_choice == -1) {
+      //             past_state = state;
+      //             state = StateName::MoveToOwnWork;
+      //           }
+      //         }
+      //       }
+      //       break;
+
     case StateName::MoveToSht:
-      handle.move_to(Area::Sht, 1, bns_count, ZState::ShtGiri, false);
+      if (hold_count == 3 && bns_count % 2 == 1) {
+        handle.move_to(Area::Sht, 1, bns_count, ZState::ShtGiri, false);
+      } else {
+        handle.move_to(Area::Sht, 1, (6 - nomal_count), ZState::ShtGiri, false);
+      }
       if (past_state == StateName::StrStore && current_pos->x > 0.05 &&
           current_pos->y > 0.7) {
         auto_cmd.x = 0.05;
         auto_cmd.y = current_pos->y;
       }
       // 現在位置を取得してZを下げる
-      if (current_pos->x < 0.1 && current_pos->y < 0.10) {
+      if (current_pos->x < 0.1 && current_pos->y < 0.0) {
         handle.move_to(ZState::Shoot);
       }
       if (has_arrived_xy() || change_state_flag) {
         if (hold_count != 3 || bns_count >= 6) {
+          nomal_count++;
           change_state(StateName::Release);
         } else {
           change_state(StateName::MoveToBns);
@@ -499,8 +537,8 @@ void AutoCmdGenerator::auto_mode() {
         auto_cmd.x = 0;
       }
 
-      if (current_pos->x < 0.3 &&
-          current_pos->y < bns_count * ) {  // 後で下げる位置を確定
+      if (current_pos->x < 0.6 &&
+          current_pos->y < 0.11 * bns_count - 0.575) {  // 後で下げる位置を確定
         handle.move_to(ZState::Shoot);
       }
       if (has_arrived_xy() || change_state_flag) {
@@ -512,9 +550,10 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::Release:
       handle.release();
       hold_count = 0;
-      sht_area_index++;
+
       handle.move_to(ZState::ShtAbove);
       if (has_arrived_z() || change_state_flag) {
+        sht_area_index++;
         change_state_flag = false;
         change_state(StateName::MoveToWait);
         own_area_index = 0;

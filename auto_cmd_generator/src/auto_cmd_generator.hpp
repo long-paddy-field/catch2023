@@ -53,6 +53,7 @@ class AutoCmdGenerator : public rclcpp::Node {
   int change_area = 0;
   bool reverse_flag = false;
   int bns_count = 0;
+  int nomal_count = 0;
   bool own_progress[6] = {false, false, false, false, false, false};
   int rayer_count = 0;
   principal_interfaces::msg::Movecommand auto_cmd;
