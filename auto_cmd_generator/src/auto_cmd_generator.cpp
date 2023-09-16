@@ -334,7 +334,6 @@ void AutoCmdGenerator::auto_mode() {
       }
       if (change_state_flag) {
         change_state(StateName::StrStore);
-        change_state_flag = false;
       }
       break;
     case StateName::StrStore:
@@ -361,56 +360,82 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::MoveToCmn:
       if (shift_flag != 0) {
         // 左右に移動、オーバーフローしたら反対側へ
-      } else if (change_area == 1) {
+        cmn_area_index += shift_flag;
+        shift_flag = 0;
+        if (cmn_area_index < 0) {
+          cmn_area_index = 8;
+        } else if (cmn_area_index > 8) {
+          cmn_area_index = 0;
+        }
+      }
+      handle.move_to(Area::Cmn, cmn_area_index % 3, cmn_area_index, true);
+      if (change_area == 1) {
         change_state(StateName::MoveToWait);
       } else if (change_area == -1) {
         change_state(StateName::MoveToStr);
       }
-      if (change_state_flag) {
+      if (has_arrived() || change_state_flag) {  // 本番は「かつ」にする
         change_state(StateName::CmnCatch);
         change_state_flag = false;
       }
       break;
     case StateName::CmnCatch:
+      handle.move_to(ZState::CmnCatch);
       if (has_arrived_z() || change_state_flag) {
         handle.grasp(Area::Cmn, cmn_area_index % 3);
-        change_state_flag = false;
-        past_state = state;
+        hold_count++;
+        spinsleep(300);
+        change_state(StateName::CmnAbove);
       }
       break;
     case StateName::CmnAbove:
+      handle.move_to(ZState::CmnAbove);
       if (has_arrived_z() || change_state_flag) {
-        change_state_flag = false;
         change_state(StateName::MoveToStr);
       }
       break;
     case StateName::MoveToRail:
+      handle.move_to(Area::Own, 1, own_area_index);
+      auto_cmd.y = 0.150;
       if (has_arrived() || change_state_flag) {
-        change_state_flag = false;
-        change_state(StateName::MoveToSht);
+        if (hold_count != 3 || bns_count >= 6) {
+          change_state(StateName::MoveToSht);
+        } else {
+          change_state(StateName::MoveToBns);
+        }
       }
       break;
     case StateName::MoveToSht:
+      handle.move_to(Area::Sht, 1, bns_count, ZState::ShtGiri, false);
       // 現在位置を取得してZを下げる
-      if (current_pos->x < -0.5) {
-        // 位置1
-      } else {
-        // 位置2
+      if (current_pos->x < -0.5 && current_pos->y < 0.0) {
+        handle.move_to(ZState::Shoot);
       }
       if (has_arrived() || change_state_flag) {
-        change_state_flag = false;
-        change_state(StateName::MoveToBns);
+        if (hold_count != 3 || bns_count >= 6) {
+          change_state(StateName::Release);
+        } else {
+          change_state(StateName::MoveToBns);
+        }
+
         // ボーナスが全部埋まってたらBnsには行かないでリリースへ
       }
       break;
     case StateName::MoveToBns:
+      handle.move_to(Area::Sht, 1, bns_count, ZState::ShtGiri, true);
+      if (current_pos->x < 0.3 &&
+          current_pos->y < bns_count * 1) {  // 後で下げる位置を確定
+        handle.move_to(ZState::Shoot);
+      }
       if (has_arrived() || change_state_flag) {
         change_state_flag = false;
         change_state(StateName::Release);
+        bns_count++;
       }
       break;
     case StateName::Release:
       handle.release();
+      hold_count = 0;
       handle.move_to(ZState::ShtAbove);
       if (has_arrived_z() || change_state_flag) {
         change_state_flag = false;
@@ -776,6 +801,7 @@ void AutoCmdGenerator::move_to_current_pos() {
 void AutoCmdGenerator::change_state(StateName state) {
   past_state = this->state;
   this->state = state;
+  change_state_flag = false;
 }
 
 int progress_ref(int own_area_index) {
