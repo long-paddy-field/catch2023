@@ -301,20 +301,13 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::MoveToStr:
       handle.move_to(Area::Str, str_index % 3, str_index, ZState::OwnCatch);
       if (shift_flag != 0) {
-        if (shift_flag == -1) {
-          if (str_index == 0) {
-            str_index = 8;
-          } else {
-            str_index--;
-          }
-        } else if (shift_flag == 1) {
-          if (str_index == 8) {
-            str_index = 0;
-          } else {
-            str_index++;
-          }
-        }
+        str_index += shift_flag;
         shift_flag = 0;
+        if (str_index < 0) {
+          str_index = 8;
+        } else if (str_index > 8) {
+          str_index = 0;
+        }
       } else if (change_area == 1) {
         cmn_area_index = str_index;
         change_state(StateName::MoveToCmn);
