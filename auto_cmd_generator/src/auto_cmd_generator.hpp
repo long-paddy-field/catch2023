@@ -28,11 +28,13 @@ class AutoCmdGenerator : public rclcpp::Node {
   std::pair<float, float> way_point;
   std::vector<std::pair<float, float>> own_area;  // 自陣エリアの目標値
   std::vector<std::pair<float, float>> cmn_area;  // 自陣エリアの目標値
+  std::vector<std::pair<float, float>> str_area;  // 自陣エリアの目標値
   std::vector<std::pair<float, float>> sht_area;  // 自陣エリアの目標値
 
-  int own_area_index = 1;  // 自陣エリアの目標値のインデックス
-  int cmn_area_index = 1;  // 共有エリアの目標値のインデックス
+  int own_area_index = 0;  // 自陣エリアの目標値のインデックス
+  int cmn_area_index = 0;  // 共有エリアの目標値のインデックス
   int sht_area_index = 0;  // 射撃エリアの目標値のインデックス
+  int str_index = 0;  // ストアエリアの目標値のインデックス
 
   int hold_count = 0;  // ホールドしたワークの数
 
@@ -44,11 +46,18 @@ class AutoCmdGenerator : public rclcpp::Node {
   bool is_init = false;  // パラメタの読み取りが終わったかどうか
   int shift_flag = 0;
   int next_choice = 0;  // リリースしたあとどっちに行くか
-  int vertical = 0;
-  int horizontal = 0;
+  float vertical = 0;
+  float horizontal = 0;
   bool store_flag = false;
   bool homing_flag = false;
-
+  int change_area = 0;
+  bool reverse_flag = false;
+  int single_count = 0;
+  bool single_flag = false;
+  int triple_count = 0;
+  bool triple_flag = false;
+  bool own_progress[6] = {false, false, false, false, false, false};
+  int rayer_count = 0;
   principal_interfaces::msg::Movecommand auto_cmd;
   principal_interfaces::msg::Movecommand::SharedPtr current_pos;
   rclcpp::TimerBase::SharedPtr timer;
@@ -76,5 +85,7 @@ class AutoCmdGenerator : public rclcpp::Node {
   bool has_arrived_z();
   bool is_auto;
   bool past_is_auto;
+
+  void change_state(StateName next_state);
 };
 }  // namespace catch2023_principal
