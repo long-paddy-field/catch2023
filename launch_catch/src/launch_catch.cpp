@@ -123,18 +123,14 @@ void ParameterManager::load_param() {
   } else {
     this->declare_parameter("blue_side.start_pos", std::vector<double>(2, 0.0));
     this->declare_parameter("blue_side.way_point", std::vector<double>(2, 0.0));
-    this->declare_parameter("blue_side.own_pos_x",
-                            std::vector<double>(16, 0.0));
-    this->declare_parameter("blue_side.own_pos_y",
-                            std::vector<double>(16, 0.0));
+    this->declare_parameter("blue_side.own_pos_x", std::vector<double>(16, 0.0));
+    this->declare_parameter("blue_side.own_pos_y", std::vector<double>(16, 0.0));
     this->declare_parameter("blue_side.cmn_pos_x", std::vector<double>(9, 0.0));
     this->declare_parameter("blue_side.cmn_pos_y", std::vector<double>(9, 0.0));
     this->declare_parameter("blue_side.str_pos_x", std::vector<double>(9, 0.0));
     this->declare_parameter("blue_side.str_pos_y", std::vector<double>(9, 0.0));
-    this->declare_parameter("blue_side.sht_pos_x",
-                            std::vector<double>(10, 0.0));
-    this->declare_parameter("blue_side.sht_pos_y",
-                            std::vector<double>(10, 0.0));
+    this->declare_parameter("blue_side.sht_pos_x", std::vector<double>(10, 0.0));
+    this->declare_parameter("blue_side.sht_pos_y", std::vector<double>(10, 0.0));
     this->declare_parameter("blue_side.own_field", std::vector<double>(4, 0.0));
     this->declare_parameter("blue_side.cmn_field", std::vector<double>(4, 0.0));
     this->declare_parameter("blue_side.sht_field", std::vector<double>(4, 0.0));
@@ -168,23 +164,23 @@ void ParameterManager::load_param() {
       msg.cmny[i] = buff[i];
     }
     buff.clear();
-    buff = this->get_parameter("red_side.str_pos_x").as_double_array();
+    buff = this->get_parameter("blue_side.str_pos_x").as_double_array();
     for (int i = 0; i < 9; i++) {
       msg.strx[i] = buff[i];
     }
     buff.clear();
-    buff = this->get_parameter("red_side.str_pos_y").as_double_array();
+    buff = this->get_parameter("blue_side.str_pos_y").as_double_array();
     for (int i = 0; i < 9; i++) {
       msg.stry[i] = buff[i];
     }
     buff.clear();
     buff = this->get_parameter("blue_side.sht_pos_x").as_double_array();
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 9; i++) {
       msg.shtx[i] = buff[i];
     }
     buff.clear();
     buff = this->get_parameter("blue_side.sht_pos_y").as_double_array();
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 9; i++) {
       msg.shty[i] = buff[i];
     }
     buff.clear();

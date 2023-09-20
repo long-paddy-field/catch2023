@@ -44,11 +44,11 @@ AutoCmdGenerator::AutoCmdGenerator()
       "joy", 10, [&](sensor_msgs::msg::Joy::SharedPtr joy) {
         this->vertical =
             fabs(joy->axes[1]) > 0.2
-                ? (side == Side::Red ? 1 : -1) * joy->axes[1] * 0.015
+                ? (side == Side::Red ? 1 : -1) * joy->axes[1] * 0.02
                 : 0;
         this->horizontal =
             fabs(joy->axes[0]) > 0.2
-                ? (side == Side::Red ? -1 : 1) * joy->axes[0] * 0.015
+                ? (side == Side::Red ? -1 : 1) * joy->axes[0] * 0.02
                 : 0;
       });
   timer_ = this->create_wall_timer(100ms, [this]() {
@@ -96,6 +96,10 @@ void AutoCmdGenerator::update() {
                      state == StateName::CmnCatch) {
             move_to_current_pos();
             state = StateName::CmnCatch;
+          } else if (state == StateName::MoveToSingle ||
+                     state == StateName::MoveToTriple) {
+            move_to_current_pos();
+            state = StateName::Release;
           }
           // } else if (state == StateName::MoveToBonus ||
           //            state == StateName::Release) {
@@ -144,7 +148,7 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToWait:
-      handle.move_to(Area::Own, 2, 0, ZState::OwnGiri);
+      handle.move_to(Area::Own, 2, 0, ZState::ShtAbove);
       auto_cmd.y += vertical;
       if (change_area == 1) {
         change_state(StateName::MoveToOwn);
@@ -193,6 +197,20 @@ void AutoCmdGenerator::auto_mode() {
       handle.move_to(Area::Own, ownref(own_area_index), own_area_index,
                      ZState::OwnGiri);
       auto_cmd.y += vertical;
+      if (shift_flag == 1) {
+        if (own_area_index == 0) {
+          own_area_index = 2;
+        } else if (own_area_index % 3 == 2 && own_area_index + 3 < 16) {
+          own_area_index += 3;
+        }
+        shift_flag = 0;
+      } else if (shift_flag == -1) {
+        if (own_area_index == 2) {
+          own_area_index = 0;
+        } else if (own_area_index % 3 == 1 && own_area_index - 3 >= 0) {
+          own_area_index -= 3;
+        }
+      }
       if (change_area == 1) {
         change_state(StateName::MoveToStr);
       } else if (change_area == -1) {
@@ -250,20 +268,41 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::StrStore:
       handle.move_to(ZState::OwnCatch);
       if (has_arrived_z() || change_state_flag) {
-        auto_cmd.hand[str_index % 3] = !auto_cmd.hand[str_index % 3];
-        if (auto_cmd.hand[str_index % 3]) {
-          hold_count++;
+        if (side == Side::Red) {
+          auto_cmd.hand[str_index % 3] = !auto_cmd.hand[str_index % 3];
+          if (auto_cmd.hand[str_index % 3]) {
+            hold_count++;
+          } else {
+            hold_count--;
+          }
+          change_state_flag = false;
+          if (hold_count == 3) {
+            triple_flag = true;
+            change_state(StateName::MoveToSht);
+          } else if (auto_cmd.hand[str_index % 3]) {
+            change_state(StateName::MoveToStr);
+          } else {
+            cmn_area_index = str_index;
+            change_state(StateName::OwnAbove);
+          }
+
         } else {
-          hold_count--;
-        }
-        change_state_flag = false;
-        if (hold_count == 3) {
-          change_state(StateName::MoveToSht);
-        } else if (auto_cmd.hand[str_index % 3]) {
-          change_state(StateName::MoveToStr);
-        } else {
-          cmn_area_index = str_index;
-          change_state(StateName::OwnAbove);
+          auto_cmd.hand[2 - (str_index % 3)] =
+              !auto_cmd.hand[2 - (str_index % 3)];
+          if (auto_cmd.hand[2 - (str_index % 3)]) {
+            hold_count++;
+          } else {
+            hold_count--;
+          }
+          change_state_flag = false;
+          if (hold_count == 3) {
+            change_state(StateName::MoveToSht);
+          } else if (2 - (auto_cmd.hand[str_index % 3])) {
+            change_state(StateName::MoveToStr);
+          } else {
+            cmn_area_index = str_index;
+            change_state(StateName::OwnAbove);
+          }
         }
       }
       break;
@@ -292,7 +331,7 @@ void AutoCmdGenerator::auto_mode() {
         str_index = cmn_area_index;
         change_state(StateName::MoveToStr);
       }
-      if (has_arrived_xy() || change_state_flag) {  // 本番は「かつ」にする
+      if (has_arrived_xy() && change_state_flag) {  // 本番は「かつ」にする
         change_state(StateName::CmnCatch);
         change_state_flag = false;
       }
@@ -314,21 +353,30 @@ void AutoCmdGenerator::auto_mode() {
       }
       break;
     case StateName::MoveToSht:
-      handle.move_to(Area::Sht, 1, 0, ZState::ShtGiri, false);
-      if (has_arrived_xy()) {
-        handle.move_to(ZState::ShtTsuke);
-        if (change_state_flag && single_flag && single_count < 6) {
-          single_flag = false;
-          change_state(StateName::MoveToSingle);
-        } else if (change_state_flag && triple_flag && triple_count < 4) {
-          triple_flag = false;
-          change_state(StateName::MoveToWall);
+      if (single_count == 0) {
+        handle.move_to(Area::Sht, 1, 3, ZState::OwnCatch, false);
+
+        if (has_arrived_xy()) {
+          change_state(StateName::Release);
+        }
+      } else {
+        handle.move_to(Area::Sht, 1, 0, ZState::OwnGiri, false);
+        if (has_arrived_xy()) {
+          handle.move_to(ZState::ShtTsuke);
+          if (change_state_flag && single_flag && single_count < 6) {
+            single_flag = false;
+            change_state(StateName::MoveToSingle);
+          } else if (change_state_flag && triple_flag && triple_count < 4) {
+            triple_flag = false;
+            change_state(StateName::MoveToWall);
+          }
         }
       }
       break;
     case StateName::MoveToSingle:
       if (single_count == 0) {
-        handle.move_to(Area::Sht, 1, 4, ZState::Shoot, true);
+        handle.move_to(Area::Sht, 1, 5, ZState::Shoot, true);
+        auto_cmd.y -= 0.02;
       } else if (single_count == 1) {
         handle.move_to(Area::Sht, 1, 3, ZState::Shoot, true);
       } else {
@@ -342,9 +390,9 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::MoveToWall:
       if (triple_count < 2) {
-        handle.move_to(Area::Sht, 1, 1, ZState::Shoot, false);
-      } else if (triple_count < 4) {
         handle.move_to(Area::Sht, 1, 6, ZState::Shoot, false);
+      } else if (triple_count < 4) {
+        handle.move_to(Area::Sht, 1, 1, ZState::Shoot, false);
       }
       if (has_arrived_xy()) {
         change_state(StateName::MoveToTriple);
@@ -352,13 +400,13 @@ void AutoCmdGenerator::auto_mode() {
       break;
     case StateName::MoveToTriple:
       if (triple_count == 0) {
-        handle.move_to(Area::Sht, 1, 2, ZState::Shoot, true);
-      } else if (triple_count == 1) {
-        handle.move_to(Area::Sht, 1, 1, ZState::Shoot, true);
-      } else if (triple_count == 2) {
-        handle.move_to(Area::Sht, 1, 5, ZState::Shoot, true);
-      } else if (triple_count == 3) {
         handle.move_to(Area::Sht, 1, 6, ZState::Shoot, true);
+      } else if (triple_count == 1) {
+        handle.move_to(Area::Sht, 1, 5, ZState::Shoot, true);
+      } else if (triple_count == 2) {
+        handle.move_to(Area::Sht, 1, 1, ZState::Shoot, true);
+      } else if (triple_count == 3) {
+        handle.move_to(Area::Sht, 1, 2, ZState::Shoot, true);
       }
       if (change_state_flag) {
         change_state(StateName::Release);
@@ -368,11 +416,14 @@ void AutoCmdGenerator::auto_mode() {
     case StateName::Release:
       handle.release();
       hold_count = 0;
-
+      if (single_count == 0) {
+        single_count++;
+      } else if (triple_count == 1) {
+        own_area_index++;
+      }
       handle.move_to(ZState::ShtAbove);
       if (has_arrived_z() || change_state_flag) {
         change_state(StateName::MoveToWait);
-        own_area_index = 0;
       }
 
       break;
@@ -713,7 +764,11 @@ bool AutoCmdGenerator::has_arrived_xy() {
   float error =
       sqrt((auto_cmd.x - current_pos->x) * (auto_cmd.x - current_pos->x)) +
       sqrt((auto_cmd.y - current_pos->y) * (auto_cmd.y - current_pos->y));
-  return error < 0.005;
+  if (single_count == 0) {
+    return error < 0.005;
+  } else {
+    return error < 0.005;
+  }
 }
 
 bool AutoCmdGenerator::has_arrived_z() {

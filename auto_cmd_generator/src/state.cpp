@@ -35,7 +35,7 @@ void GeneralCommand::move_to(Area area, int hand, int num, bool is_advance) {
                 hand_offset;
         msg.rotate = 1;
       } else if (side == Side::Blue) {
-        msg.x = location.cmn_area[num].first + arm_offset * (hand - 1) +
+        msg.x = location.cmn_area[num].first - arm_offset * (hand - 1) +
                 finger_offset;
         msg.y = location.cmn_area[num].second - (is_advance ? 0 : cmn_offset) +
                 hand_offset;
@@ -43,9 +43,15 @@ void GeneralCommand::move_to(Area area, int hand, int num, bool is_advance) {
       }
       break;
     case Area::Own:
-      msg.x = location.own_area[num].first + hand_offset;
-      msg.y = location.own_area[num].second + arm_offset * (1 - hand) -
-              finger_offset;
+      if (side == Side::Red) {
+        msg.x = location.own_area[num].first + hand_offset;
+        msg.y = location.own_area[num].second + arm_offset * (1 - hand) -
+                finger_offset;
+      } else {
+        msg.x = location.own_area[num].first + hand_offset;
+        msg.y = location.own_area[num].second + arm_offset * (hand - 1) -
+                finger_offset;
+      }
       msg.rotate = 0;
 
       break;
@@ -60,7 +66,7 @@ void GeneralCommand::move_to(Area area, int hand, int num, bool is_advance) {
       msg.rotate = 0;
       break;
     case Area::Init:
-      msg.x = location.init_area.first+hand_offset;
+      msg.x = location.init_area.first + hand_offset;
       msg.y = location.init_area.second;
       msg.rotate = 0;
       break;
@@ -72,7 +78,13 @@ void GeneralCommand::move_to(ZState z_state) {
   msg.z = location.stepper_state[static_cast<int>(z_state)];
 }
 void GeneralCommand::grasp(Area area, int n) {
-  if (area == Area::Cmn) {
+  if (area == Area::Cmn || area == Area::Str) {
+    if (side == Side::Blue) {
+      msg.hand[2 - n] = true;
+    } else if (side == Side::Red) {
+      msg.hand[n] = true;
+    }
+  } else if (area == Area::Own) {
     if (side == Side::Blue) {
       msg.hand[2 - n] = true;
     } else if (side == Side::Red) {
